@@ -70,27 +70,32 @@ landet am Cursor:
 
 ## Installation in Home Assistant (HACS)
 
-> **Hinweis:** Im Gegensatz zu Integrations-Repos (z. B. DeepSeek Conversation) ist dies ein
-> **HACS-Dashboard-Plugin** (Frontend). Es gibt kein `custom_components`-Verzeichnis und kein
-> Integrations-Icon in *Einstellungen → Geräte & Dienste* — stattdessen registrierst du das
-> Panel einmalig in `configuration.yaml`.
+Die Integration registriert das Sidebar-Panel **automatisch** — **kein** `panel_custom`-Eintrag in der `configuration.yaml` nötig.
 
-1. **HACS** → ⋮ → **Custom repositories** → URL dieses Repos, Kategorie **Dashboard** → installieren.
-   (HACS lädt `dashboard.js` aus dem `dist/`-Ordner bzw. aus GitHub-Release-Assets.)
-2. **Repository-Name merken:** Der Pfad lautet `/hacsfiles/<repo-name>/dashboard.js`, wobei
-   `<repo-name>` der **GitHub-Repository-Name in Kleinbuchstaben** ist (z. B. `react-dashboard-studio`).
-   Nach der Installation zeigt HACS den exakten Pfad in den Repository-Details.
-3. Einmalig in `configuration.yaml` (danach HA neu starten) — siehe auch [`examples/panel_custom.yaml`](examples/panel_custom.yaml):
-   ```yaml
-   panel_custom:
-     - name: react-dashboard-studio-panel  # MUSS dem Custom-Element-Tag entsprechen
-       sidebar_title: Dashboard Studio
-       sidebar_icon: mdi:react
-       url_path: react-dashboard-studio
-       module_url: /hacsfiles/react-dashboard-studio/dashboard.js
-   ```
+### 1. HACS — Custom Repository (einmalig)
+
+1. [HACS](https://hacs.xyz/) installieren (falls noch nicht vorhanden).
+2. **HACS → Integrations → ⋮ → Custom repositories**
+3. URL: `https://github.com/leofleischmann/React-Dashboard-Studio`
+4. Kategorie: **Integration** (nicht Dashboard)
+5. **Add**
+
+### 2. Integration installieren
+
+1. **HACS → Integrations** → **React Dashboard Studio** suchen → **Download**
+2. **Home Assistant neu starten**
+
+### 3. Integration einrichten
+
+1. **Einstellungen → Geräte & Dienste → Integration hinzufügen**
+2. **React Dashboard Studio** suchen → bestätigen
+3. In der Sidebar erscheint **Dashboard Studio**
 
 Dein Dashboard-Code wird pro HA-Benutzer über `frontend/user_data` gespeichert.
+
+### Legacy: manuelles `panel_custom` (optional)
+
+Nur nötig, wenn du **bewusst ohne** die Integration arbeiten willst — siehe [`examples/panel_custom.yaml`](examples/panel_custom.yaml).
 
 ---
 
@@ -103,7 +108,7 @@ für normales Dashboard-Bauen brauchst du das nicht.
 npm install
 cp .env.local.example .env.local   # HA-URL + Long-Lived-Token eintragen
 npm run dev                        # Studio lokal, verbunden mit echter HA
-npm run build                      # → dist/dashboard.js (eine Datei für HACS)
+npm run build                      # → dist/ + custom_components/…/dashboard.js
 ```
 
 ### Struktur

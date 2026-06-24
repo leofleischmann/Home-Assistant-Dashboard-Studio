@@ -1,7 +1,7 @@
 name: Release
 
-# Builds dashboard.js and attaches it to the GitHub Release, so HACS can
-# download it. Create a Release in GitHub (e.g. tag v0.1.0) to trigger this.
+# Builds dashboard.js and attaches it to the GitHub Release.
+# Create a Release in GitHub (e.g. tag v0.1.2) to trigger this.
 on:
   release:
     types: [published]
@@ -23,15 +23,10 @@ jobs:
       - run: npm ci
       - run: npm run build
 
-      - name: Verify single self-contained bundle
+      - name: Verify panel bundle
         shell: bash
         run: |
-          shopt -s nullglob
-          files=(dist/*.js)
-          if [ "${#files[@]}" -ne 1 ]; then
-            echo "Expected exactly one dist/*.js for HACS, found: ${files[*]}"
-            exit 1
-          fi
+          test -f custom_components/react_dashboard_studio/dashboard.js
           if grep -q 'from "./' dist/dashboard.js; then
             echo "dashboard.js must not import other chunks."
             exit 1
@@ -40,4 +35,6 @@ jobs:
       - name: Attach dashboard.js to the release
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/dashboard.js
+          files: |
+            dist/dashboard.js
+            custom_components/react_dashboard_studio/dashboard.js

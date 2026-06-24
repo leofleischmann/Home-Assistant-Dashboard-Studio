@@ -1,0 +1,12 @@
+{
+  "domain": "react_dashboard_studio",
+  "name": "React Dashboard Studio",
+  "codeowners": ["@leofleischmann"],
+  "config_flow": true,
+  "dependencies": ["frontend", "http", "panel_custom"],
+  "documentation": "https://github.com/leofleischmann/React-Dashboard-Studio",
+  "integration_type": "service",
+  "iot_class": "calculated",
+  "issue_tracker": "https://github.com/leofleischmann/React-Dashboard-Studio/issues",
+  "version": "0.1.2"
+}

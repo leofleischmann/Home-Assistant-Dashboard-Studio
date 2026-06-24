@@ -1,13 +1,11 @@
-# Copy into configuration.yaml (once), then restart Home Assistant.
+# Legacy: manual panel_custom setup (without the HACS integration)
 #
-# Replace <repo-name> with your GitHub repository name in lowercase
-# (exactly as shown in HACS after installation, e.g. "react-dashboard-studio").
-#
-# The `name` MUST match the custom element tag defined in src/panel.tsx.
+# Prefer the HACS Integration flow instead — it registers the panel automatically.
+# Only use this if you install dashboard.js manually under /config/www/community/.
 
 panel_custom:
   - name: react-dashboard-studio-panel
     sidebar_title: Dashboard Studio
     sidebar_icon: mdi:react
     url_path: react-dashboard-studio
-    module_url: /hacsfiles/react-dashboard-studio/dashboard.js
+    module_url: /local/community/react-dashboard-studio/dashboard.js

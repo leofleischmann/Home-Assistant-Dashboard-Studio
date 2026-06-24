@@ -1,0 +1,14 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "React Dashboard Studio",
+        "description": "Installs the dashboard studio as a sidebar panel. After setup, **Dashboard Studio** appears in the sidebar — no configuration.yaml entry required."
+      }
+    },
+    "abort": {
+      "already_configured": "React Dashboard Studio is already configured.",
+      "already_in_progress": "Setup is already in progress."
+    }
+  }
+}

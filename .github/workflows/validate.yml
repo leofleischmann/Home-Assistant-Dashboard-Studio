@@ -25,20 +25,23 @@ jobs:
       - run: npm ci
       - run: npm run build
 
-      - name: Verify single self-contained bundle
+      - name: Verify panel bundle exists in integration
         shell: bash
         run: |
-          shopt -s nullglob
-          files=(dist/*.js)
-          if [ "${#files[@]}" -ne 1 ]; then
-            echo "Expected exactly one dist/*.js for HACS, found: ${files[*]}"
-            exit 1
-          fi
+          test -f custom_components/react_dashboard_studio/dashboard.js
+          test -f dist/dashboard.js
           if grep -q 'from "./' dist/dashboard.js; then
-            echo "dashboard.js must not import other chunks (HACS release ships one file)."
+            echo "dashboard.js must not import other chunks."
             exit 1
           fi
 
       - uses: hacs/action@main
         with:
-          category: plugin
+          category: integration
+
+  hassfest:
+    name: Hassfest validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: home-assistant/actions/hassfest@master
