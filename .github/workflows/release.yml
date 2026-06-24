@@ -1,13 +1,12 @@
 name: Release
 
-# Builds dashboard.js and attaches it to the GitHub Release.
-# Create a Release in GitHub (e.g. tag v0.1.2) to trigger this.
+# Verifies the panel bundle builds correctly when a release is published.
 on:
   release:
     types: [published]
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   build:
@@ -27,14 +26,7 @@ jobs:
         shell: bash
         run: |
           test -f custom_components/react_dashboard_studio/dashboard.js
-          if grep -q 'from "./' dist/dashboard.js; then
+          if grep -q 'from "./' custom_components/react_dashboard_studio/dashboard.js; then
             echo "dashboard.js must not import other chunks."
             exit 1
           fi
-
-      - name: Attach dashboard.js to the release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            dist/dashboard.js
-            custom_components/react_dashboard_studio/dashboard.js

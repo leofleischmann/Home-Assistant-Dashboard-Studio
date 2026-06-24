@@ -3,7 +3,7 @@ import { hassStore } from './hass/store';
 import type { AppHass } from './hass/types';
 import Studio from './studio/Studio';
 
-// MUST match the `name:` field in your panel_custom config (and contain a hyphen).
+// MUST match PANEL_TAG in custom_components/react_dashboard_studio/const.py
 const TAG = 'react-dashboard-studio-panel';
 
 /**

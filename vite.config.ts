@@ -4,7 +4,7 @@ import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js';
 
 // Two modes from one config:
 //  - `vite`         → dev server using index.html + src/dev.tsx (live HA over WebSocket)
-//  - `vite build`   → single self-contained ESM file dist/dashboard.js for HACS
+//  - `vite build`   → panel bundle copied to custom_components/react_dashboard_studio/
 export default defineConfig(({ command }) => ({
   plugins: [
     react(),
@@ -24,7 +24,7 @@ export default defineConfig(({ command }) => ({
     target: 'esnext',
     outDir: 'dist',
     emptyOutDir: true,
-    // HACS ships a single dashboard.js (see release.yml). No code-splitting.
+    // Single self-contained bundle — copied to custom_components/ by scripts/copy-dashboard.mjs
     lib: {
       entry: 'src/panel.tsx',
       formats: ['es'],

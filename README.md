@@ -14,7 +14,7 @@ und dein Code wird **in Home Assistant gespeichert**.
 
 ## Workflow für dich als Nutzer
 
-1. Panel über HACS installieren + einmal in `configuration.yaml` registrieren (siehe unten).
+1. Integration über HACS installieren und einrichten (siehe unten).
 2. In der Seitenleiste auf **„Dashboard Studio"** klicken.
 3. Oben rechts **„✎ Bearbeiten"** → links Datei-Panel + Code-Editor, rechts die Live-Vorschau.
 4. React schreiben. Sensoren holst du dir als reaktive Variablen:
@@ -93,10 +93,6 @@ Die Integration registriert das Sidebar-Panel **automatisch** — **kein** `pane
 
 Dein Dashboard-Code wird pro HA-Benutzer über `frontend/user_data` gespeichert.
 
-### Legacy: manuelles `panel_custom` (optional)
-
-Nur nötig, wenn du **bewusst ohne** die Integration arbeiten willst — siehe [`examples/panel_custom.yaml`](examples/panel_custom.yaml).
-
 ---
 
 ## Das Panel selbst weiterentwickeln (optional)
@@ -108,28 +104,23 @@ für normales Dashboard-Bauen brauchst du das nicht.
 npm install
 cp .env.local.example .env.local   # HA-URL + Long-Lived-Token eintragen
 npm run dev                        # Studio lokal, verbunden mit echter HA
-npm run build                      # → dist/ + custom_components/…/dashboard.js
+npm run build                      # → custom_components/react_dashboard_studio/dashboard.js
 ```
 
 ### Struktur
 
 ```
+custom_components/react_dashboard_studio/   HACS-Integration (Panel-Registrierung)
 src/
-├─ panel.tsx              Custom-Element für HA (Prod-Entry) → rendert Studio
-├─ dev.tsx                Lokaler Entry: verbindet via WebSocket mit echter HA
-├─ studio/
-│  ├─ Studio.tsx          Shell: Datei-Panel + Editor + Vorschau + Speichern
-│  ├─ Editor.tsx          CodeMirror
-│  ├─ FilePanel.tsx       Datei-Liste (anlegen/umbenennen/löschen/Einstieg)
-│  ├─ EntityInserter.tsx  Sensor/Aktion-Sucher → Snippet am Cursor
-│  ├─ Preview.tsx         Rendert deinen Code + Error-Boundary
-│  ├─ compile.ts          Sucrase + Modul-Resolver (Multi-File, im Browser)
-│  ├─ runtime.ts          Registry der `import`-baren Module (@ha, …)
-│  ├─ storage.ts          Projekt speichern/laden via Home Assistant
-│  └─ project.ts          Projekt-Typ, Default-Projekt, Pfad-Helfer
-├─ hass/                  Sensor-Schicht (Store + Hooks) — die eingebaute API
-├─ components/widgets.tsx Mitgelieferte UI-Komponenten (@ha/ui)
+├─ panel.tsx              Custom-Element (Prod-Entry) → rendert Studio
+├─ dev.tsx                Lokaler Dev-Entry via WebSocket
+├─ studio/                Editor, Vorschau, Compile-Pipeline
+├─ hass/                  Sensor-Schicht (@ha Hooks)
+├─ components/widgets.tsx UI-Komponenten (@ha/ui)
 └─ lib/format.ts          Formatierungs-Helfer (@ha/format)
+scripts/
+├─ copy-dashboard.mjs     Kopiert Build → custom_components/
+└─ gen-entity-types.mjs   Typen für lokale Entwicklung (npm run gen:types)
 ```
 
 Neue API ergänzen = in `widgets.tsx`/`format.ts`/`hooks.ts` exportieren und in

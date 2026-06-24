@@ -1,6 +1,6 @@
 node_modules
-dist/*
-!dist/dashboard.js
+dist
 .env.local
 *.local
 .DS_Store
+.claude
