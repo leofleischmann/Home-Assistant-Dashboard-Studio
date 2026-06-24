@@ -67,6 +67,7 @@ export function Header() {
 
   // Erste 'weather.*'-Entity automatisch verwenden.
   const weather = useEntitiesByDomain('weather')[0];
+  const tempUnit = weather?.attributes.temperature_unit || '°';
 
   const time = now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
   const date = now.toLocaleDateString('de-DE', {
@@ -86,7 +87,9 @@ export function Header() {
       {weather && (
         <div className="rd-hero__weather">
           <span className="rd-hero__wicon">{weatherIcon(weather.state)}</span>
-          <span className="rd-hero__wtemp">{num(weather.attributes.temperature)}°</span>
+          <span className="rd-hero__wtemp">
+            {num(weather.attributes.temperature)} {tempUnit}
+          </span>
           <span className="rd-hero__wsub">
             {weather.attributes.friendly_name || 'Wetter'}
           </span>
@@ -161,6 +164,8 @@ export function Summary() {
 const LIGHTS_TSX = `import { useEntitiesByDomain } from '@ha';
 import { Section, LightTile } from '@ha/ui';
 
+const MAX = 12;
+
 // Alle Lichter automatisch als antippbare Kacheln (leuchten, wenn an).
 export function Lights() {
   const lights = useEntitiesByDomain('light');
@@ -173,13 +178,25 @@ export function Lights() {
     );
   }
 
+  // Eingeschaltete zuerst – so steht das Wichtige oben.
+  const sorted = [...lights].sort(
+    (a, b) => (b.state === 'on' ? 1 : 0) - (a.state === 'on' ? 1 : 0),
+  );
+  const shown = sorted.slice(0, MAX);
+  const more = lights.length - shown.length;
+
   return (
     <Section title={'Lichter · ' + lights.length}>
       <div className="rd-tiles">
-        {lights.slice(0, 12).map((light) => (
+        {shown.map((light) => (
           <LightTile key={light.entity_id} entityId={light.entity_id} />
         ))}
       </div>
+      {more > 0 && (
+        <p style={{ margin: '10px 2px 0', color: 'var(--rd-text-2)', fontSize: '0.85rem' }}>
+          + {more} weitere
+        </p>
+      )}
     </Section>
   );
 }

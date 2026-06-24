@@ -56,6 +56,7 @@ export default function Studio() {
   const [splitPct, setSplitPct] = useState(46);
 
   const cmRef = useRef<ReactCodeMirrorRef>(null);
+  const splitRef = useRef<HTMLDivElement>(null);
   const changedPathRef = useRef<string | null>(null);
   const fullRebuildRef = useRef(false);
   const hasCompiledRef = useRef(false);
@@ -135,12 +136,16 @@ export default function Studio() {
     return () => window.removeEventListener('keydown', onKey);
   }, [save, mode]);
 
-  // Drag-to-resize the editor/preview split.
+  // Drag-to-resize the editor/preview split. Measured relative to the split
+  // container (not the window): on desktop the panel sits to the right of HA's
+  // sidebar, so the window origin is not the container origin.
   const dragging = useRef(false);
   useEffect(() => {
     const onMove = (e: PointerEvent) => {
       if (!dragging.current) return;
-      const pct = (e.clientX / window.innerWidth) * 100;
+      const rect = splitRef.current?.getBoundingClientRect();
+      if (!rect || rect.width === 0) return;
+      const pct = ((e.clientX - rect.left) / rect.width) * 100;
       setSplitPct(Math.min(75, Math.max(25, pct)));
     };
     const onUp = () => (dragging.current = false);
@@ -273,9 +278,14 @@ export default function Studio() {
       {mode === 'view' ? (
         <div className="rd-studio__preview rd-studio__preview--full">
           <Preview Dashboard={Dashboard} version={version} onRuntimeError={setError} />
+          {error && (
+            <div className="rd-studio__error">
+              <pre>{error}</pre>
+            </div>
+          )}
         </div>
       ) : (
-        <div className="rd-studio__split">
+        <div className="rd-studio__split" ref={splitRef}>
           <FilePanel
             files={project.files}
             entry={project.entry}

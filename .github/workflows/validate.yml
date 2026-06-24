@@ -19,10 +19,14 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - run: npm ci
+
+      - name: Check default dashboard compiles
+        run: npm run check:default
+
       - run: npm run build
 
       - name: Verify panel bundle
@@ -31,6 +35,16 @@ jobs:
           test -f custom_components/react_dashboard_studio/dashboard.js
           if grep -q 'from "./' custom_components/react_dashboard_studio/dashboard.js; then
             echo "dashboard.js must not import other chunks."
+            exit 1
+          fi
+
+      - name: Ensure committed bundle is up to date
+        shell: bash
+        run: |
+          if ! git diff --quiet -- custom_components/react_dashboard_studio/dashboard.js; then
+            echo "::error::custom_components/.../dashboard.js is stale."
+            echo "Run 'npm run build' and commit the result."
+            git --no-pager diff --stat -- custom_components/react_dashboard_studio/dashboard.js
             exit 1
           fi
 

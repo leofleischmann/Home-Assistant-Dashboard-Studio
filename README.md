@@ -123,8 +123,9 @@ src/
 ├─ components/widgets.tsx UI-Komponenten (@ha/ui)
 └─ lib/format.ts          Formatierungs-Helfer (@ha/format)
 scripts/
-├─ copy-dashboard.mjs     Kopiert Build → custom_components/
-└─ gen-entity-types.mjs   Typen für lokale Entwicklung (npm run gen:types)
+├─ copy-dashboard.mjs        Kopiert Build → custom_components/
+├─ check-default-project.mjs Prüft, dass das Standard-Dashboard kompiliert (npm run check:default)
+└─ gen-entity-types.mjs      Typen für lokale Entwicklung (npm run gen:types)
 ```
 
 Neue API ergänzen = in `widgets.tsx`/`format.ts`/`hooks.ts` exportieren und in
