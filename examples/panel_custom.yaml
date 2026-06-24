@@ -1,0 +1,13 @@
+# Copy into configuration.yaml (once), then restart Home Assistant.
+#
+# Replace <repo-name> with your GitHub repository name in lowercase
+# (exactly as shown in HACS after installation, e.g. "react-dashboard-studio").
+#
+# The `name` MUST match the custom element tag defined in src/panel.tsx.
+
+panel_custom:
+  - name: react-dashboard-studio-panel
+    sidebar_title: Dashboard Studio
+    sidebar_icon: mdi:react
+    url_path: react-dashboard-studio
+    module_url: /hacsfiles/<repo-name>/dashboard.js

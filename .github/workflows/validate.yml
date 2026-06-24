@@ -1,0 +1,44 @@
+name: Validate
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - master
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build & HACS validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build
+
+      - name: Verify single self-contained bundle
+        shell: bash
+        run: |
+          shopt -s nullglob
+          files=(dist/*.js)
+          if [ "${#files[@]}" -ne 1 ]; then
+            echo "Expected exactly one dist/*.js for HACS, found: ${files[*]}"
+            exit 1
+          fi
+          if grep -q 'from "./' dist/dashboard.js; then
+            echo "dashboard.js must not import other chunks (HACS release ships one file)."
+            exit 1
+          fi
+
+      - uses: hacs/action@main
+        with:
+          category: plugin
