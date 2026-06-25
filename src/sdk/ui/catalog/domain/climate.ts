@@ -8,7 +8,8 @@ export const CLIMATE_DOMAIN_CATALOG: WidgetCatalogEntry[] = [
     category: 'domain',
     domains: ['climate'],
     inserterDefault: true,
-    snippet: (id) => `<ClimateCard entityId="${id}" />`,
+    snippet: (id) =>
+      `<ClimateCard entityId="${id}" showTarget showMode showToggle />`,
     Demo: ClimateCard,
   },
   {

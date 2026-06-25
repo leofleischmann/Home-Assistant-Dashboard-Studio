@@ -67,3 +67,17 @@
   font-variant-numeric: tabular-nums;
 }
 .rd-sunarc--golden .rd-sunarc__remaining { color: #e8a54b; }
+.rd-sunarc--compact {
+  padding: 6px 8px 8px;
+  max-width: 220px;
+}
+.rd-sunarc--compact .rd-sunarc__labels strong {
+  font-size: 0.78rem;
+}
+.rd-sunarc--compact .rd-sunarc__labels small {
+  font-size: 0.58rem;
+}
+.rd-sunarc--compact .rd-sunarc__remaining {
+  font-size: 0.65rem;
+  margin-top: 4px;
+}

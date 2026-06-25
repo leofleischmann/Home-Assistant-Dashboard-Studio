@@ -71,7 +71,7 @@ export function CameraDemo({ entityId }: { entityId: string }) {
 }
 
 export function LiveClockDemo(_props: { entityId: string }) {
-  return <LiveClock />;
+  return <LiveClock showSeconds locale="de-DE" />;
 }
 
 export function ValueOrb3DDemo({ entityId }: { entityId: string }) {
@@ -84,17 +84,33 @@ export function ValueOrb3DDemo({ entityId }: { entityId: string }) {
       entityId={entityId}
       min={min}
       max={max}
+      size="compact"
       color={isTemperature ? '#e63a12' : '#3b82f6'}
     />
   );
 }
 
 export function WeatherForecastRowDemo({ entityId }: { entityId: string }) {
-  return <WeatherForecastRow entityId={entityId} days={5} />;
+  return (
+    <WeatherForecastRow
+      entityId={entityId}
+      days={5}
+      locale="de-DE"
+      showPrecipitation
+    />
+  );
 }
 
 export function MinitimelineDemo({ entityId }: { entityId: string }) {
-  return <Minitimeline entityId={entityId} limit={5} hours={24} />;
+  return (
+    <Minitimeline
+      entityId={entityId}
+      limit={5}
+      hours={24}
+      timeFormat="clock"
+      showRelativeHint
+    />
+  );
 }
 
 function pickBatteryEntity(entities: readonly HassEntity[]): string | undefined {
@@ -122,6 +138,8 @@ export function CircularProgressDemo({ entityId }: { entityId: string }) {
       label={shortLabel}
       caption={pct(value)}
       color={isBattery ? batteryColor(value) : 'var(--rd-accent)'}
+      warningBelow={isBattery ? 30 : undefined}
+      criticalBelow={isBattery ? 15 : undefined}
     />
   );
 }

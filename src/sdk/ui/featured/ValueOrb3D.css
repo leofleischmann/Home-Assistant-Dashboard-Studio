@@ -214,3 +214,16 @@
     animation: none;
   }
 }
+
+.rd-value-orb--compact .rd-value-orb__canvas {
+  height: 160px;
+}
+.rd-value-orb--large .rd-value-orb__canvas {
+  height: 280px;
+}
+.rd-value-orb--compact .rd-value-orb__footer strong {
+  font-size: 1.1rem;
+}
+.rd-value-orb--large .rd-value-orb__footer strong {
+  font-size: 1.45rem;
+}

@@ -1,42 +1,76 @@
+import { useEffect } from 'react';
 import { callService, useEntity } from '../../../hass/hooks';
 import { entityDisplayName, isAvailable, num, pct, stateLabel, temp } from '../../../format';
+
+export type ClimateCardProps = {
+  entityId: string;
+  label?: string;
+  /** Show target temperature (default true). */
+  showTarget?: boolean;
+  /** Show HVAC mode badge (default true). */
+  showMode?: boolean;
+  /** Show toggle button (default true). */
+  showToggle?: boolean;
+  /** Reduced padding and font sizes. */
+  compact?: boolean;
+};
 
 export function ClimateCard({
   entityId,
   label,
-}: {
-  entityId: string;
-  label?: string;
-}) {
+  showTarget = true,
+  showMode = true,
+  showToggle = true,
+  compact = false,
+}: ClimateCardProps) {
   const climate = useEntity(entityId);
   const name = label ?? climate?.attributes.friendly_name ?? entityId;
   const current = climate?.attributes.current_temperature;
   const target = climate?.attributes.temperature;
   const mode = climate?.attributes.hvac_mode ?? climate?.state;
 
+  useEffect(() => {
+    console.log('[Debug ClimateCard]:', {
+      entityId,
+      showTarget,
+      showMode,
+      showToggle,
+      compact,
+      current,
+      target,
+      mode,
+    });
+  }, [entityId, showTarget, showMode, showToggle, compact, current, target, mode]);
+
   return (
-    <div className="rd-card rd-climate">
+    <div className={`rd-card rd-climate${compact ? ' rd-climate--compact' : ''}`}>
       <div className="rd-climate__head">
         <span className="rd-climate__name">{name}</span>
-        <span className="rd-climate__mode">{String(mode ?? '–')}</span>
+        {showMode && (
+          <span className="rd-climate__mode">{String(mode ?? '–')}</span>
+        )}
       </div>
       <div className="rd-climate__temps">
         <span>
           {num(current !== undefined ? String(current) : undefined)}
           <small> °C ist</small>
         </span>
-        <span className="rd-climate__target">
-          → {num(target !== undefined ? String(target) : undefined)}
-          <small> °C soll</small>
-        </span>
+        {showTarget && (
+          <span className="rd-climate__target">
+            → {num(target !== undefined ? String(target) : undefined)}
+            <small> °C soll</small>
+          </span>
+        )}
       </div>
-      <button
-        className="rd-pill"
-        disabled={!isAvailable(climate)}
-        onClick={() => callService('climate', 'toggle', { entity_id: entityId })}
-      >
-        Klima umschalten
-      </button>
+      {showToggle && (
+        <button
+          className="rd-pill"
+          disabled={!isAvailable(climate)}
+          onClick={() => callService('climate', 'toggle', { entity_id: entityId })}
+        >
+          Klima umschalten
+        </button>
+      )}
     </div>
   );
 }

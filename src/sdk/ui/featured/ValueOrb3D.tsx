@@ -99,6 +99,8 @@ export type ValueOrb3DProps = {
   colors?: ValueOrb3DColors;
   /** Footer reading color (default: HA theme primary, then `color`). */
   accent?: string;
+  /** Canvas height preset (default `default`). */
+  size?: 'compact' | 'default' | 'large';
 };
 
 function formatReading(entity: HassEntity | undefined): string {
@@ -128,6 +130,7 @@ export function ValueOrb3D({
   color,
   colors,
   accent,
+  size = 'default',
 }: ValueOrb3DProps) {
   const entity = useEntity(entityId);
   const dark = useDarkMode();
@@ -151,12 +154,13 @@ export function ValueOrb3D({
       curve,
       color,
       colors,
+      size,
       intensity: intensity.toFixed(2),
       lavaScale: innerScale.toFixed(2),
       level,
       renderer: 'css-glass-lava',
     });
-  }, [entityId, rawValue, min, max, curve, color, colors, intensity, innerScale, level]);
+  }, [entityId, rawValue, min, max, curve, color, colors, size, intensity, innerScale, level]);
 
   const lavaCore = colors?.core ?? color;
   const style = {
@@ -174,8 +178,18 @@ export function ValueOrb3D({
   const reading = formatReading(entity);
   const title = showLevel ? `${reading} — ${level}` : reading;
 
+  const sizeClass =
+    size === 'compact'
+      ? ' rd-value-orb--compact'
+      : size === 'large'
+        ? ' rd-value-orb--large'
+        : '';
+
   return (
-    <div className={`rd-value-orb${dark ? ' rd-value-orb--dark' : ''}`} style={style}>
+    <div
+      className={`rd-value-orb${dark ? ' rd-value-orb--dark' : ''}${sizeClass}`}
+      style={style}
+    >
       <div className="rd-value-orb__canvas" title={title}>
         <div className="rd-value-orb__glow" aria-hidden />
         <div className="rd-value-orb__stage">

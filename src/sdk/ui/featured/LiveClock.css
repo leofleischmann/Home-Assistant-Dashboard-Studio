@@ -23,3 +23,12 @@
   color: var(--rd-text-2);
   text-transform: capitalize;
 }
+.rd-clock--compact .rd-clock__time strong {
+  font-size: clamp(1.5rem, 4vw, 2rem);
+}
+.rd-clock--compact .rd-clock__sec {
+  font-size: 0.85rem;
+}
+.rd-clock--compact .rd-clock__date {
+  font-size: 0.78rem;
+}

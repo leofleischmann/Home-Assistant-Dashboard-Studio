@@ -24,6 +24,8 @@ export type SunArcProps = {
   };
   /** Show “remaining daylight” / “next sunrise” hint (default true). */
   showRemaining?: boolean;
+  /** `compact` scales down the arc for tight layouts. */
+  size?: 'compact' | 'default';
 };
 
 function moonPhase(date: Date): number {
@@ -147,6 +149,7 @@ export function SunArc({
   locale = 'de-DE',
   labels,
   showRemaining = true,
+  size = 'default',
 }: SunArcProps) {
   const sun = useSun(entityId);
   const now = useTime(60_000);
@@ -218,10 +221,24 @@ export function SunArc({
     return `Aufgang in ${m} min`;
   }, [isDay, sun.rising, now]);
 
+  useEffect(() => {
+    console.log('[Debug SunArc]:', {
+      entityId,
+      size,
+      isDay,
+      elevation,
+      showStars,
+      showMoon,
+      showRemaining,
+    });
+  }, [entityId, size, isDay, elevation, showStars, showMoon, showRemaining]);
+
   const footer = daylightLeft ?? nightUntilRise;
 
   return (
-    <div className={`rd-sunarc rd-sunarc--${tone}${golden ? ' rd-sunarc--golden' : ''}`}>
+    <div
+      className={`rd-sunarc rd-sunarc--${tone}${golden ? ' rd-sunarc--golden' : ''}${size === 'compact' ? ' rd-sunarc--compact' : ''}`}
+    >
       <svg viewBox={`0 0 ${W} ${H}`} className="rd-sunarc__svg" aria-hidden>
         <defs>
           <linearGradient id={`${uid}-sky`} x1="0" y1="0" x2="0" y2="1">

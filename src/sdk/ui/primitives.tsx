@@ -31,25 +31,34 @@ export function Section({
   );
 }
 
-/** A small labelled stat tile. */
-export function Stat({
-  label,
-  value,
-  unit,
-  accent,
-}: {
+export type StatProps = {
   label: string;
   value: string;
   unit?: string;
+  /** Full-card accent background (default false). */
   accent?: boolean;
-}) {
+  /** Value text color, or card background when `accent` is true. */
+  color?: string;
+  /** Secondary hint below the value (e.g. trend context). */
+  sub?: string;
+};
+
+/** A small labelled stat tile. */
+export function Stat({ label, value, unit, accent, color, sub }: StatProps) {
+  const cardStyle =
+    accent && color
+      ? ({ background: color, borderColor: color } as React.CSSProperties)
+      : undefined;
+  const valueStyle = !accent && color ? ({ color } as React.CSSProperties) : undefined;
+
   return (
-    <div className={`rd-card rd-stat ${accent ? 'is-accent' : ''}`}>
+    <div className={`rd-card rd-stat ${accent ? 'is-accent' : ''}`} style={cardStyle}>
       <span className="rd-stat__label">{label}</span>
-      <span className="rd-stat__value">
+      <span className="rd-stat__value" style={valueStyle}>
         {value}
         {unit && <small> {unit}</small>}
       </span>
+      {sub && <span className="rd-stat__sub">{sub}</span>}
     </div>
   );
 }

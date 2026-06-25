@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useWeatherForecast } from '../../hass/hooks';
 import { forecastDayLabel, num, temp, weatherIcon } from '../../format';
 
@@ -5,6 +6,12 @@ export type WeatherForecastRowProps = {
   entityId: string;
   days?: number;
   type?: 'daily' | 'hourly' | 'twice_daily';
+  /** BCP 47 locale for weekday labels (default `de-DE`). */
+  locale?: string;
+  /** Show precipitation probability (default true). */
+  showPrecipitation?: boolean;
+  /** Icon + temps only — narrower columns. */
+  compact?: boolean;
 };
 
 function formatTempRange(
@@ -24,9 +31,24 @@ export function WeatherForecastRow({
   entityId,
   days = 5,
   type = 'daily',
+  locale = 'de-DE',
+  showPrecipitation = true,
+  compact = false,
 }: WeatherForecastRowProps) {
   const { forecast, loading } = useWeatherForecast(entityId, { days, type });
   const now = new Date();
+
+  useEffect(() => {
+    console.log('[Debug WeatherForecastRow]:', {
+      entityId,
+      days,
+      type,
+      locale,
+      showPrecipitation,
+      compact,
+      count: forecast.length,
+    });
+  }, [entityId, days, type, locale, showPrecipitation, compact, forecast.length]);
 
   if (loading && forecast.length === 0) {
     return (
@@ -45,11 +67,13 @@ export function WeatherForecastRow({
   }
 
   return (
-    <div className="rd-card rd-weather-forecast">
+    <div
+      className={`rd-card rd-weather-forecast${compact ? ' rd-weather-forecast--compact' : ''}`}
+    >
       {forecast.map((entry) => (
         <div key={entry.datetime.toISOString()} className="rd-weather-forecast__day">
           <span className="rd-weather-forecast__label">
-            {forecastDayLabel(entry.datetime, now)}
+            {forecastDayLabel(entry.datetime, now, locale)}
           </span>
           <span className="rd-weather-forecast__icon" aria-hidden>
             {weatherIcon(entry.condition)}
@@ -57,7 +81,7 @@ export function WeatherForecastRow({
           <span className="rd-weather-forecast__temp">
             {formatTempRange(entry.temperature, entry.templow)}
           </span>
-          {entry.precipitation_probability !== undefined && (
+          {showPrecipitation && entry.precipitation_probability !== undefined && (
             <span className="rd-weather-forecast__rain">
               {num(entry.precipitation_probability, 0)} %
             </span>
