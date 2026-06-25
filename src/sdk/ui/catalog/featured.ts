@@ -1,7 +1,6 @@
 import type { HassEntity } from '../../hass/types';
 import type { WidgetCatalogEntry } from './types';
 import { LiveClockDemo } from './demos';
-import { HoloCore } from '../featured/HoloCore';
 import { EnergyScene3D } from '../featured/EnergyScene3D';
 import { SunArc } from '../featured/SunArc';
 
@@ -32,17 +31,8 @@ export const FEATURED_WIDGET_CATALOG: WidgetCatalogEntry[] = [
     Demo: SunArc,
   },
   {
-    name: 'HoloCore',
-    label: 'Holo-Kern',
-    category: 'featured',
-    domains: ['sensor'],
-    pickExample: pickPowerSensor,
-    snippet: (id) => `<HoloCore entityId="${id}" />`,
-    Demo: HoloCore,
-  },
-  {
     name: 'EnergyScene3D',
-    label: '3D Energie-Kern',
+    label: 'Energie-Orb',
     category: 'featured',
     domains: ['sensor'],
     pickExample: pickPowerSensor,

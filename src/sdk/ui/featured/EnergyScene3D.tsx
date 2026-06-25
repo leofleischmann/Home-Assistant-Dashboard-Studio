@@ -1,24 +1,14 @@
 import { useEffect, useMemo, useRef, type CSSProperties } from 'react';
 import {
-  ACESFilmicToneMapping,
-  AdditiveBlending,
-  AmbientLight,
-  BufferAttribute,
-  BufferGeometry,
   Clock,
   Color,
-  FogExp2,
+  EdgesGeometry,
+  Group,
   IcosahedronGeometry,
-  Mesh,
-  MeshBasicMaterial,
-  MeshStandardMaterial,
+  LineBasicMaterial,
+  LineSegments,
   PerspectiveCamera,
-  PointLight,
-  Points,
-  PointsMaterial,
   Scene,
-  TorusGeometry,
-  TorusKnotGeometry,
   WebGLRenderer,
 } from 'three';
 import { useDarkMode, useEntity } from '../../hass/hooks';
@@ -26,10 +16,10 @@ import { useTheme } from '../../hass/theme';
 import type { HassEntity } from '../../hass/types';
 import { entityDisplayName, num, power } from '../../format';
 
-const CANVAS_HEIGHT = 236;
+const CANVAS_HEIGHT = 220;
 
 function intensityFromEntity(entity: HassEntity | undefined): number {
-  if (!entity) return 0.35;
+  if (!entity) return 0.3;
   const v = Number.parseFloat(entity.state);
   if (Number.isNaN(v) || v < 0) return 0.15;
 
@@ -44,7 +34,7 @@ function intensityFromEntity(entity: HassEntity | undefined): number {
 }
 
 function formatReading(entity: HassEntity | undefined): string {
-  if (!entity) return 'Demo-Modus';
+  if (!entity) return '—';
   const v = Number.parseFloat(entity.state);
   if (Number.isNaN(v)) return entity.state;
   if (entity.attributes.device_class === 'power') return power(v);
@@ -58,15 +48,33 @@ type SceneState = {
   primary: string;
 };
 
+function wireOrb(
+  radius: number,
+  detail: number,
+  color: number,
+  opacity: number,
+): { mesh: LineSegments; geo: IcosahedronGeometry; edges: EdgesGeometry; mat: LineBasicMaterial } {
+  const geo = new IcosahedronGeometry(radius, detail);
+  const edges = new EdgesGeometry(geo);
+  const mat = new LineBasicMaterial({
+    color,
+    transparent: true,
+    opacity,
+    depthWrite: false,
+  });
+  const mesh = new LineSegments(edges, mat);
+  return { mesh, geo, edges, mat };
+}
+
 /**
- * WebGL energy reactor (Three.js) — torus knot + particle field, driven by power sensor.
+ * Wireframe energy orb — pulsing icosahedron driven by a power sensor.
  */
 export function EnergyScene3D({ entityId }: { entityId: string }) {
   const entity = useEntity(entityId);
   const dark = useDarkMode();
   const theme = useTheme();
   const containerRef = useRef<HTMLDivElement>(null);
-  const stateRef = useRef<SceneState>({ intensity: 0.35, dark: false, primary: '#4f7cff' });
+  const stateRef = useRef<SceneState>({ intensity: 0.3, dark: false, primary: '#4f7cff' });
 
   const intensity = useMemo(() => intensityFromEntity(entity), [entity]);
   const label = entityDisplayName(entity, entityId);
@@ -84,127 +92,56 @@ export function EnergyScene3D({ entityId }: { entityId: string }) {
     if (!container) return;
 
     const width = Math.max(container.clientWidth, 1);
-    const isDark = stateRef.current.dark;
     const scene = new Scene();
-    scene.fog = new FogExp2(isDark ? 0x060a12 : 0xe4e9f5, 0.038);
 
-    const camera = new PerspectiveCamera(42, width / CANVAS_HEIGHT, 0.1, 80);
-    camera.position.set(0, 0.35, 4.6);
+    const camera = new PerspectiveCamera(40, width / CANVAS_HEIGHT, 0.1, 20);
+    camera.position.set(0, 0.1, 2.4);
+    camera.lookAt(0, 0, 0);
 
     const renderer = new WebGLRenderer({ antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(width, CANVAS_HEIGHT);
-    renderer.toneMapping = ACESFilmicToneMapping;
-    renderer.setClearColor(isDark ? 0x060a12 : 0xe4e9f5, isDark ? 1 : 0);
+    renderer.setClearColor(0x000000, 0);
     container.appendChild(renderer.domElement);
 
-    const knotGeo = new TorusKnotGeometry(0.52, 0.15, 160, 28);
-    const knotMat = new MeshStandardMaterial({
-      color: 0x4f7cff,
-      emissive: 0x1a3388,
-      emissiveIntensity: 0.9,
-      metalness: 0.88,
-      roughness: 0.22,
-    });
-    const knot = new Mesh(knotGeo, knotMat);
-    scene.add(knot);
+    const accent = new Color(stateRef.current.primary);
+    const outer = wireOrb(0.72, 3, accent.getHex(), 0.88);
+    const mid = wireOrb(0.52, 2, accent.getHex(), 0.45);
+    const core = wireOrb(0.28, 1, accent.getHex(), 0.7);
 
-    const coreGeo = new IcosahedronGeometry(0.26, 2);
-    const coreMat = new MeshStandardMaterial({
-      color: 0xffffff,
-      emissive: 0x88bbff,
-      emissiveIntensity: 1.4,
-      metalness: 0.2,
-      roughness: 0.08,
-    });
-    const core = new Mesh(coreGeo, coreMat);
-    scene.add(core);
-
-    const ringGeo = new TorusGeometry(1.05, 0.014, 10, 96);
-    const ringMat = new MeshBasicMaterial({
-      color: 0x6ea8fe,
-      transparent: true,
-      opacity: 0.45,
-    });
-    const ring = new Mesh(ringGeo, ringMat);
-    ring.rotation.x = Math.PI / 2;
-    scene.add(ring);
-
-    const ring2 = ring.clone();
-    ring2.scale.setScalar(1.18);
-    ring2.rotation.x = Math.PI / 3;
-    ring2.rotation.z = Math.PI / 5;
-    scene.add(ring2);
-
-    const particleCount = 640;
-    const positions = new Float32Array(particleCount * 3);
-    for (let i = 0; i < particleCount; i++) {
-      const radius = 1.1 + Math.random() * 2.2;
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos(2 * Math.random() - 1);
-      positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
-      positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
-      positions[i * 3 + 2] = radius * Math.cos(phi);
-    }
-    const particlesGeo = new BufferGeometry();
-    particlesGeo.setAttribute('position', new BufferAttribute(positions, 3));
-    const particlesMat = new PointsMaterial({
-      size: 0.028,
-      color: 0x6ea8fe,
-      transparent: true,
-      opacity: 0.7,
-      blending: AdditiveBlending,
-      depthWrite: false,
-    });
-    const particles = new Points(particlesGeo, particlesMat);
-    scene.add(particles);
-
-    scene.add(new AmbientLight(0x334466, 0.45));
-    const keyLight = new PointLight(0x6ea8fe, 2.2, 14);
-    keyLight.position.set(2.5, 1.8, 3.5);
-    const rimLight = new PointLight(0xff9955, 0.7, 12);
-    rimLight.position.set(-2.2, -0.5, 2.5);
-    scene.add(keyLight, rimLight);
+    const orbGroup = new Group();
+    orbGroup.add(outer.mesh, mid.mesh, core.mesh);
+    scene.add(orbGroup);
 
     const clock = new Clock();
     let raf = 0;
     let disposed = false;
+    const tint = new Color();
 
     const animate = () => {
       if (disposed) return;
       raf = requestAnimationFrame(animate);
       const elapsed = clock.getElapsedTime();
-      const { intensity: i, dark: isDark, primary: primaryCss } = stateRef.current;
-      const speed = 0.45 + i * 1.8;
+      const { intensity: i, primary } = stateRef.current;
 
-      knot.rotation.x = elapsed * 0.22 * speed;
-      knot.rotation.y = elapsed * 0.38 * speed;
-      core.rotation.x = elapsed * 0.55 * speed;
-      core.rotation.y = elapsed * 0.72 * speed;
-      ring.rotation.z = elapsed * 0.28 * speed;
-      ring2.rotation.y = elapsed * -0.2 * speed;
-      particles.rotation.y = elapsed * 0.06 * speed;
+      tint.set(primary);
+      const pulseHz = 0.85 + i * 1.6;
+      const pulse = Math.sin(elapsed * pulseHz * Math.PI * 2);
+      const scale = 1 + pulse * (0.035 + i * 0.07);
 
-      const accent = new Color(primaryCss);
-      const hot = accent.clone().lerp(new Color(0xff6622), i * 0.65);
-      knotMat.color.copy(hot);
-      knotMat.emissive.copy(hot).multiplyScalar(0.35);
-      knotMat.emissiveIntensity = 0.55 + i * 1.4;
-      coreMat.emissive.copy(accent);
-      coreMat.emissiveIntensity = 0.9 + i * 2.2;
-      keyLight.intensity = 1.4 + i * 3.5;
-      keyLight.color.copy(hot);
-      rimLight.intensity = 0.35 + i * 1.1;
-      particlesMat.color.copy(accent);
-      ringMat.color.copy(accent);
+      orbGroup.scale.setScalar(scale);
+      orbGroup.rotation.y = elapsed * 0.22;
+      orbGroup.rotation.x = elapsed * 0.11;
+      mid.mesh.rotation.y = -elapsed * 0.35;
+      core.mesh.rotation.z = elapsed * 0.4;
 
-      const bg = isDark ? 0x060a12 : 0xe4e9f5;
-      scene.fog!.color.setHex(bg);
-      renderer.setClearColor(bg, isDark ? 1 : 0);
-
-      camera.position.x = Math.sin(elapsed * 0.18) * 0.35;
-      camera.position.y = 0.35 + Math.sin(elapsed * 0.14) * 0.12;
-      camera.lookAt(0, 0, 0);
+      const baseOpacity = 0.55 + i * 0.35;
+      outer.mat.color.copy(tint);
+      outer.mat.opacity = baseOpacity + pulse * 0.12;
+      mid.mat.color.copy(tint);
+      mid.mat.opacity = 0.28 + i * 0.2 + pulse * 0.08;
+      core.mat.color.copy(tint);
+      core.mat.opacity = 0.5 + i * 0.35 + pulse * 0.15;
 
       renderer.render(scene, camera);
     };
@@ -219,32 +156,30 @@ export function EnergyScene3D({ entityId }: { entityId: string }) {
     const ro = new ResizeObserver(onResize);
     ro.observe(container);
 
-    console.log('[Debug EnergyScene3D]: WebGL scene initialized');
+    console.log('[Debug EnergyScene3D]: wireframe orb initialized');
 
     return () => {
       disposed = true;
       cancelAnimationFrame(raf);
       ro.disconnect();
       renderer.domElement.remove();
-      knotGeo.dispose();
-      knotMat.dispose();
-      coreGeo.dispose();
-      coreMat.dispose();
-      ringGeo.dispose();
-      ringMat.dispose();
-      ring2.geometry.dispose();
-      (ring2.material as MeshBasicMaterial).dispose();
-      particlesGeo.dispose();
-      particlesMat.dispose();
+      for (const layer of [outer, mid, core]) {
+        layer.geo.dispose();
+        layer.edges.dispose();
+        layer.mat.dispose();
+      }
       renderer.dispose();
     };
   }, [entityId]);
 
-  const style = { '--es3d-accent': theme.primary } as CSSProperties;
+  const style = {
+    '--es3d-accent': theme.primary,
+    '--es3d-pulse': String(0.35 + intensity * 0.65),
+  } as CSSProperties;
 
   return (
-    <div className="rd-energy3d" style={style}>
-      <div ref={containerRef} className="rd-energy3d__canvas" />
+    <div className={`rd-energy3d${dark ? ' rd-energy3d--dark' : ''}`} style={style}>
+      <div ref={containerRef} className="rd-energy3d__canvas" aria-hidden />
       <div className="rd-energy3d__footer">
         <strong>{formatReading(entity)}</strong>
         <small>{label}</small>
