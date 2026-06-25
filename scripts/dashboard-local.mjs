@@ -18,6 +18,11 @@ export const META_FILE = join(DASHBOARD_DIR, '.studio.json');
 export const ENTRY_DEFAULT = 'dashboard.tsx';
 export const CODE_RE = /\.(tsx?|jsx?)$/;
 
+/** Dashboard source only — excludes VS Code helpers like `ha-entities.d.ts`. */
+export function isDashboardCodeFile(name) {
+  return CODE_RE.test(name) && !name.endsWith('.d.ts');
+}
+
 export function listLocalFiles(dir = DASHBOARD_DIR, base = DASHBOARD_DIR) {
   const out = {};
   if (!existsSync(dir)) return out;
@@ -25,7 +30,7 @@ export function listLocalFiles(dir = DASHBOARD_DIR, base = DASHBOARD_DIR) {
     if (name.startsWith('.')) continue;
     const full = join(dir, name);
     if (statSync(full).isDirectory()) Object.assign(out, listLocalFiles(full, base));
-    else if (CODE_RE.test(name)) {
+    else if (isDashboardCodeFile(name)) {
       const rel = relative(base, full).split(sep).join('/');
       out[rel] = readFileSync(full, 'utf8');
     }
