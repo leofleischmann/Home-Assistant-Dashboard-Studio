@@ -26,6 +26,9 @@ type Mode = 'view' | 'edit';
 
 const serialize = (p: Project) => JSON.stringify({ e: p.entry, f: p.files });
 
+/** `npm run dev` — preview only; code is edited in VS Code (./dashboard/). */
+const isDevPreview = import.meta.env.DEV;
+
 /**
  * Ask Home Assistant to toggle its sidebar. On mobile, custom panels render
  * without HA's own header, so the sidebar is otherwise unreachable — we provide
@@ -76,7 +79,6 @@ export default function Studio() {
       setActivePath(p.files[p.entry] !== undefined ? p.entry : Object.keys(p.files)[0]);
       setLoaded(true);
       fullRebuildRef.current = true;
-      if (fromLocal && import.meta.env.DEV) setMode('edit');
     });
     return () => {
       cancelled = true;
@@ -101,12 +103,12 @@ export default function Studio() {
   }, []);
 
   // Recompile on project changes (debounced in edit mode).
-  // In view mode only the initial compile runs so the preview is available.
+  // Dev preview recompiles on every ./dashboard/ change; production view mode only once.
   useEffect(() => {
     if (!loaded) return;
-    if (mode !== 'edit' && hasCompiledRef.current) return;
+    if (!isDevPreview && mode !== 'edit' && hasCompiledRef.current) return;
 
-    const delay = mode === 'edit' ? 300 : 0;
+    const delay = !isDevPreview && mode === 'edit' ? 300 : 0;
     const handle = setTimeout(() => {
       try {
         const invalidate = fullRebuildRef.current
@@ -239,6 +241,37 @@ export default function Studio() {
       <div className="rd-center">
         <div className="rd-spinner" />
         <p>Verbinde mit Home Assistant…</p>
+      </div>
+    );
+  }
+
+  if (isDevPreview) {
+    return (
+      <div className="rd-studio is-viewing is-dev-preview" onKeyDown={stopShortcutsWhileTyping}>
+        <div className="rd-studio__bar">
+          <span className="rd-studio__title">Dev-Vorschau</span>
+          {localMode && (
+            <span className="rd-studio__local" title="Code in VS Code bearbeiten (./dashboard/)">
+              📁 dashboard/
+            </span>
+          )}
+          <span
+            className={`rd-studio__status ${error ? 'is-error' : 'is-ok'}`}
+            title={error ?? 'Vorschau aktuell'}
+          >
+            {error ? '● Fehler' : '● Live'}
+          </span>
+          <span className="rd-studio__spacer" />
+          <span className="rd-studio__hint">Bearbeiten in VS Code · Speichern aktualisiert die Vorschau</span>
+        </div>
+        <div className="rd-studio__preview rd-studio__preview--full">
+          <Preview Dashboard={Dashboard} version={version} onRuntimeError={setError} />
+          {error && (
+            <div className="rd-studio__error">
+              <pre>{error}</pre>
+            </div>
+          )}
+        </div>
       </div>
     );
   }

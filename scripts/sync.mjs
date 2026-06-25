@@ -11,9 +11,10 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import WebSocket from 'ws';
 import {
-  DASHBOARD_DIR,
   ENTRY_DEFAULT,
+  filterDashboardFiles,
   listLocalFiles,
+  pruneLocalOrphans,
   readEntry,
   writeEntry,
   writeLocalFiles,
@@ -107,12 +108,21 @@ async function pull(conn) {
     console.log('In HA ist noch kein Dashboard gespeichert – nichts zu laden.');
     return;
   }
-  writeLocalFiles(value.files);
+  const files = filterDashboardFiles(value.files);
+  if (Object.keys(files).length === 0) {
+    console.log('In HA sind keine Dashboard-Code-Dateien gespeichert – nichts zu laden.');
+    return;
+  }
+  writeLocalFiles(files);
+  const removed = pruneLocalOrphans(Object.keys(files));
   writeEntry(value.entry || ENTRY_DEFAULT);
   console.log(
-    `⬇️  ${Object.keys(value.files).length} Datei(en) nach dashboard/ geladen ` +
+    `⬇️  ${Object.keys(files).length} Datei(en) nach dashboard/ geladen ` +
       `(Einstieg: ${value.entry || ENTRY_DEFAULT}).`,
   );
+  if (removed.length > 0) {
+    console.log(`   🗑  ${removed.length} veraltete lokale Datei(en) entfernt: ${removed.join(', ')}`);
+  }
 }
 
 async function push(conn) {
@@ -122,6 +132,11 @@ async function push(conn) {
   }
   let entry = readEntry();
   if (!files[entry]) entry = files[ENTRY_DEFAULT] ? ENTRY_DEFAULT : Object.keys(files).sort()[0];
+
+  const res = await conn.call({ type: 'frontend/get_user_data', key: STORAGE_KEY });
+  const remoteCode = filterDashboardFiles(res?.value?.files ?? {});
+  const removed = Object.keys(remoteCode).filter((path) => !(path in files));
+
   await conn.call({
     type: 'frontend/set_user_data',
     key: STORAGE_KEY,
@@ -132,6 +147,9 @@ async function push(conn) {
     `⬆️  [${stamp}] ${Object.keys(files).length} Datei(en) zu HA gepusht ` +
       `(Einstieg: ${entry}). Studio/Dashboard neu laden zum Sehen.`,
   );
+  if (removed.length > 0) {
+    console.log(`   🗑  ${removed.length} entfernte Datei(en) in HA gelöscht: ${removed.join(', ')}`);
+  }
 }
 
 async function watch(conn) {
