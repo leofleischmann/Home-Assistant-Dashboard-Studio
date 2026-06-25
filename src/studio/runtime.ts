@@ -13,7 +13,7 @@ export const registry: Record<string, unknown> = {
   'react/jsx-runtime': ReactJsxRuntime,
   // Your Home Assistant API.
   '@ha': hassApi, // useEntity, useEntityState, useEntitiesByDomain, useHassReady, callService, states
-  '@ha/ui': ui, // Card, Stat, Section, Grid, EntityRow, Gauge, ActionButton, ClimateCard, BinaryBadge, …
+  '@ha/ui': ui, // Card, Stat, Grid, EntityRow, Gauge, MediaPlayerCard, CoverCard, WeatherCard, …
   '@ha/format': format, // num, euro, isAvailable, stateNumber, weatherIcon, greeting, batteryColor
 };
 

@@ -38,7 +38,7 @@ export default function Dashboard() {
 | Thema | Kurz |
 | --- | --- |
 | **Mehrere Dateien** | Im Datei-Panel anlegen, z. B. `components/Karte.tsx`, per `./…` importieren. ⌂ = Einstiegsdatei |
-| **Entities einfügen** | **⚡ Sensor / Aktion** — Domain-Filter, suchen, Snippet einfügen |
+| **Entities einfügen** | **⚡ Sensor / Aktion** — Wert / Aktion / ID / **Widget** (JSX), Domain-Filter |
 | **Importierbare Module** | `@ha`, `@ha/ui`, `@ha/format`, `react` — keine beliebigen npm-Pakete |
 | **Mobil** | Nur Anzeige, kein Editor |
 
@@ -88,6 +88,6 @@ Neue Exports in `hooks.ts` / `widgets.tsx` / `format.ts` und in [`runtime.ts`](s
 | Modul | Inhalt |
 | --- | --- |
 | `@ha` | `useEntity`, `useEntityState`, `useEntitiesByDomain`, `useHassReady`, `callService`, `states` |
-| `@ha/ui` | `Card`, `Stat`, `Section`, `Grid`, `EntityRow`, `Gauge`, `ActionButton`, `ClimateCard`, `BinaryBadge`, `LightTile`, `RoomCard`, `DeviceCard`, `BatteryRow` |
+| `@ha/ui` | `Card`, `Stat`, `Section`, `Grid`, `EntityRow`, `Gauge`, `ActionButton`, `ClimateCard`, `BinaryBadge`, `LightTile`, `MediaPlayerCard`, `CoverCard`, `WeatherCard`, `PersonChip`, `NumberSlider`, `RoomCard`, `DeviceCard`, `BatteryRow` |
 | `@ha/format` | `num`, `euro`, `isAvailable`, `stateNumber`, `weatherIcon`, `greeting`, `batteryColor` |
 | `react` | React inkl. Hooks |
