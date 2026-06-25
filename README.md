@@ -60,14 +60,14 @@ Token: HA → Profil → **Sicherheit** → **Long-Lived Access Tokens** → ers
 
 | Befehl | Wann |
 | --- | --- |
-| `npm run dev` | Browser unter `http://localhost:5173` — Live-Vorschau mit echten HA-Daten, lädt `./dashboard/` |
+| `npm run dev` | Nur **Live-Vorschau** (kein Browser-Editor) — Code in VS Code unter `./dashboard/` |
 | `npm run sync:watch` | Optional parallel: jede Speicherung in VS Code wird zu HA hochladen |
 | `npm run gen:types` | Optional: Entity-Liste für VS Code (`dashboard/ENTITIES.md`) |
 | `npm run sync:pull` / `sync:push` | Einmalig laden bzw. hochladen |
 
-**Typischer Ablauf:** Terminal 1 → `npm run dev` · VS Code → `./dashboard/` · Terminal 2 optional → `npm run sync:watch`. Im Dev-Studio: **⚡ Sensor / Aktion** für Entity-Snippets.
+**Typischer Ablauf:** Terminal 1 → `npm run dev` (Vorschau) · VS Code → `./dashboard/` · Terminal 2 optional → `npm run sync:watch` (Push inkl. Löschen entfernter Dateien in HA).
 
-Oben **📁 dashboard/** = lokaler Modus. **Nicht** gleichzeitig in VS Code und im HA-Browser-Editor am selben Dashboard arbeiten.
+Oben **📁 dashboard/** = lokaler Modus. Der Dev-Server zeigt **keinen Editor** — bearbeiten nur in VS Code.
 
 ---
 

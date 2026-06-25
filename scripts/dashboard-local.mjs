@@ -5,7 +5,9 @@ import {
   mkdirSync,
   readFileSync,
   readdirSync,
+  rmSync,
   statSync,
+  unlinkSync,
   writeFileSync,
 } from 'node:fs';
 import { dirname, join, relative, sep } from 'node:path';
@@ -52,12 +54,49 @@ export function writeEntry(entry) {
   writeFileSync(META_FILE, JSON.stringify({ entry }, null, 2) + '\n');
 }
 
+export function filterDashboardFiles(files) {
+  const out = {};
+  for (const [path, content] of Object.entries(files ?? {})) {
+    const name = path.split('/').pop() ?? path;
+    if (isDashboardCodeFile(name)) out[path] = content;
+  }
+  return out;
+}
+
 export function writeLocalFiles(files) {
   for (const [path, content] of Object.entries(files)) {
     const full = join(DASHBOARD_DIR, path);
     mkdirSync(dirname(full), { recursive: true });
     writeFileSync(full, content);
   }
+}
+
+/** Remove dashboard code files on disk that are no longer in the project. */
+export function pruneLocalOrphans(keepPaths) {
+  const keep = new Set(keepPaths);
+  if (!existsSync(DASHBOARD_DIR)) return [];
+
+  const removed = [];
+
+  function walk(dir, base) {
+    for (const name of readdirSync(dir)) {
+      if (name.startsWith('.')) continue;
+      const full = join(dir, name);
+      if (statSync(full).isDirectory()) {
+        walk(full, base);
+        if (readdirSync(full).length === 0) rmSync(full, { recursive: true });
+        continue;
+      }
+      const rel = relative(base, full).split(sep).join('/');
+      if (!isDashboardCodeFile(name)) continue;
+      if (keep.has(rel)) continue;
+      unlinkSync(full);
+      removed.push(rel);
+    }
+  }
+
+  walk(DASHBOARD_DIR, DASHBOARD_DIR);
+  return removed;
 }
 
 export function readLocalProject() {
@@ -75,5 +114,6 @@ export function writeLocalProject(project) {
     throw new Error('Leeres Projekt – nichts zu speichern.');
   }
   writeLocalFiles(project.files);
+  pruneLocalOrphans(Object.keys(project.files));
   writeEntry(project.entry || ENTRY_DEFAULT);
 }
