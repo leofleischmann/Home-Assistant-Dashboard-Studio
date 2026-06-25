@@ -1,5 +1,5 @@
-export { SunArc } from './SunArc';
-export { LiveClock } from './LiveClock';
+export { SunArc, type SunArcProps } from './SunArc';
+export { LiveClock, type LiveClockProps } from './LiveClock';
 export {
   ValueOrb3D,
   mapToIntensity,

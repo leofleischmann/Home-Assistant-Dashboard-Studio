@@ -44,6 +44,8 @@ function seriesDomain(points: HistoryPoint[], pad = 0.08): [number, number] {
 export function SparkChart({
   series,
   height = 88,
+  width = 320,
+  strokeWidth = 2,
   showLegend = true,
   loading = false,
   emptyLabel = 'Kein Verlauf',
@@ -51,12 +53,13 @@ export function SparkChart({
 }: {
   series: ChartSeries[];
   height?: number;
+  width?: number;
+  strokeWidth?: number;
   showLegend?: boolean;
   loading?: boolean;
   emptyLabel?: string;
   loadingLabel?: string;
 }) {
-  const width = 320;
   const active = series.filter((s) => s.points.length >= 2);
 
   if (active.length === 0) {
@@ -113,7 +116,7 @@ export function SparkChart({
                 d={d}
                 fill="none"
                 stroke={s.color}
-                strokeWidth="2"
+                strokeWidth={strokeWidth}
                 vectorEffect="non-scaling-stroke"
               />
             </g>

@@ -10,7 +10,7 @@ export const FEATURED_WIDGET_CATALOG: WidgetCatalogEntry[] = [
     category: 'featured',
     domains: ['sun'],
     inserterDefault: true,
-    snippet: (id) => `<SunArc entityId="${id}" />`,
+    snippet: (id) => `<SunArc entityId="${id}" showStars showMoon />`,
     Demo: SunArc,
   },
   {
@@ -28,7 +28,7 @@ export const FEATURED_WIDGET_CATALOG: WidgetCatalogEntry[] = [
     category: 'featured',
     domains: [],
     optionalEntity: true,
-    snippet: '<LiveClock />',
+    snippet: '<LiveClock showSeconds locale="de-DE" />',
     Demo: LiveClockDemo,
   },
 ];

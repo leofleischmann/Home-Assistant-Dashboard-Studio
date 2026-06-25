@@ -1,8 +1,30 @@
 import { useId, useMemo } from 'react';
 import { useSun, useTime } from '../../hass/hooks';
 import { num } from '../../format';
+import './SunArc.css';
 
 type SkyTone = 'day' | 'twilight' | 'night';
+
+export type SunArcProps = {
+  entityId?: string;
+  /** Show stars during night (default true). */
+  showStars?: boolean;
+  /** Show moon disc when sun is below horizon (default true). */
+  showMoon?: boolean;
+  /** Northern vs. southern hemisphere — flips the arc vertically (default `north`). */
+  hemisphere?: 'north' | 'south';
+  /** BCP 47 locale for time labels (default `de-DE`). */
+  locale?: string;
+  /** Custom footer labels for rise / peak / set. */
+  labels?: {
+    rise?: string;
+    set?: string;
+    elevationDay?: string;
+    elevationNight?: string;
+  };
+  /** Show “remaining daylight” / “next sunrise” hint (default true). */
+  showRemaining?: boolean;
+};
 
 function moonPhase(date: Date): number {
   const ref = Date.UTC(2000, 0, 6, 18, 14, 0);
@@ -10,9 +32,9 @@ function moonPhase(date: Date): number {
   return (((date.getTime() - ref) % synodic) + synodic) % synodic / synodic;
 }
 
-function formatSunEvent(date: Date | undefined, now: Date): string {
+function formatSunEvent(date: Date | undefined, now: Date, locale: string): string {
   if (!date) return '—';
-  const time = date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+  const time = date.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
   if (date.toDateString() !== now.toDateString()) return `morgen ${time}`;
   return time;
 }
@@ -68,10 +90,23 @@ function MoonDisc({ phase, r }: { phase: number; r: number }) {
  * Sun path arc for `sun.sun` — sky gradient, stars at night, moon phase,
  * azimuth for position along the semicircle track; elevation drives sky tone and labels.
  */
-export function SunArc({ entityId = 'sun.sun' }: { entityId?: string }) {
+export function SunArc({
+  entityId = 'sun.sun',
+  showStars = true,
+  showMoon = true,
+  hemisphere = 'north',
+  locale = 'de-DE',
+  labels,
+  showRemaining = true,
+}: SunArcProps) {
   const sun = useSun(entityId);
   const now = useTime(60_000);
   const uid = useId().replace(/:/g, '');
+
+  const riseLabel = labels?.rise ?? 'Aufgang';
+  const setLabel = labels?.set ?? 'Untergang';
+  const elevDayLabel = labels?.elevationDay ?? 'Sonnenstand';
+  const elevNightLabel = labels?.elevationNight ?? 'unter Horizont';
 
   const W = 280;
   const H = 148;
@@ -82,9 +117,9 @@ export function SunArc({ entityId = 'sun.sun' }: { entityId?: string }) {
 
   const az = sun.azimuth ?? 180;
   const t = Math.min(1, Math.max(0, (az - 90) / 180));
-  // Semicircle track: t=0 east (sunrise), t=0.5 south (noon), t=1 west (sunset)
+  const arcSign = hemisphere === 'south' ? -1 : 1;
   const sx = cx - r * Math.cos(Math.PI * t);
-  const sy = cy - r * Math.sin(Math.PI * t);
+  const sy = cy - arcSign * r * Math.sin(Math.PI * t);
 
   const isDay = sun.isDay ?? true;
   const elevation = sun.elevation ?? 0;
@@ -92,7 +127,10 @@ export function SunArc({ entityId = 'sun.sun' }: { entityId?: string }) {
   const golden = isGoldenHour(elevation, isDay);
   const phase = moonPhase(now);
 
-  const arc = `M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`;
+  const arc =
+    hemisphere === 'south'
+      ? `M ${cx - r} ${cy} A ${r} ${r} 0 0 0 ${cx + r} ${cy}`
+      : `M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`;
 
   const daylightLeft = useMemo(() => {
     if (!isDay || !sun.setting) return null;
@@ -156,6 +194,7 @@ export function SunArc({ entityId = 'sun.sun' }: { entityId?: string }) {
           <rect x="0" y="0" width={W} height={H} fill={`url(#${uid}-sky)`} />
 
           {tone === 'night' &&
+            showStars &&
             STARS.map(([x, y, size], i) => (
               <circle
                 key={i}
@@ -207,8 +246,10 @@ export function SunArc({ entityId = 'sun.sun' }: { entityId?: string }) {
                   </g>
                 )}
               </>
-            ) : (
+            ) : showMoon ? (
               <MoonDisc phase={phase} r={8} />
+            ) : (
+              <circle r={6} className="rd-sunarc__body" />
             )}
           </g>
         </g>
@@ -217,23 +258,23 @@ export function SunArc({ entityId = 'sun.sun' }: { entityId?: string }) {
       <div className="rd-sunarc__labels">
         <div>
           <span className="rd-sunarc__ico">↑</span>
-          <strong>{formatSunEvent(sun.rising, now)}</strong>
-          <small>Aufgang</small>
+          <strong>{formatSunEvent(sun.rising, now, locale)}</strong>
+          <small>{riseLabel}</small>
         </div>
         <div className="rd-sunarc__elev">
           <strong>{num(sun.elevation)}°</strong>
           <small title={`Azimut ${num(sun.azimuth)}°`}>
-            {isDay ? 'Sonnenstand' : 'unter Horizont'}
+            {isDay ? elevDayLabel : elevNightLabel}
           </small>
         </div>
         <div>
           <span className="rd-sunarc__ico">↓</span>
-          <strong>{formatSunEvent(sun.setting, now)}</strong>
-          <small>Untergang</small>
+          <strong>{formatSunEvent(sun.setting, now, locale)}</strong>
+          <small>{setLabel}</small>
         </div>
       </div>
 
-      {footer && <p className="rd-sunarc__remaining">{footer}</p>}
+      {showRemaining && footer && <p className="rd-sunarc__remaining">{footer}</p>}
     </div>
   );
 }

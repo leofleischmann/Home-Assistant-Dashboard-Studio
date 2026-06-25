@@ -278,10 +278,16 @@ export function CameraTile({
   entityId,
   label,
   refreshSec = 10,
+  fit = 'cover',
+  enlargeOnClick = false,
 }: {
   entityId: string;
   label?: string;
   refreshSec?: number;
+  /** CSS object-fit for the snapshot (default `cover`). */
+  fit?: 'cover' | 'contain';
+  /** Open full snapshot in a new tab on click (default false). */
+  enlargeOnClick?: boolean;
 }) {
   const camera = useEntity(entityId);
   const name = label ?? entityDisplayName(camera, entityId);
@@ -294,15 +300,35 @@ export function CameraTile({
 
   const src = cameraProxyUrl(entityId, tick);
 
+  useEffect(() => {
+    console.log('[Debug CameraTile]:', { entityId, refreshSec, fit, enlargeOnClick });
+  }, [entityId, refreshSec, fit, enlargeOnClick]);
+
+  const img = (
+    <img
+      className="rd-camera__img"
+      src={src}
+      alt={name}
+      loading="lazy"
+      style={{ objectFit: fit }}
+    />
+  );
+
   return (
     <div className="rd-card rd-camera">
       <span className="rd-camera__name">{name}</span>
-      <img
-        className="rd-camera__img"
-        src={src}
-        alt={name}
-        loading="lazy"
-      />
+      {enlargeOnClick ? (
+        <button
+          type="button"
+          className="rd-camera__zoom"
+          onClick={() => window.open(src, '_blank', 'noopener,noreferrer')}
+          aria-label={`${name} vergrößern`}
+        >
+          {img}
+        </button>
+      ) : (
+        img
+      )}
     </div>
   );
 }

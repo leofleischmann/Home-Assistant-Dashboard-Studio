@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { callService, useEntity } from '../../../hass/hooks';
 import {
   defaultEntityService,
@@ -20,7 +21,19 @@ const BULB_ICON = (
   </svg>
 );
 
-export function LightTile({ entityId, name }: { entityId: string; name?: string }) {
+export function LightTile({
+  entityId,
+  name,
+  icon,
+  showBrightness = false,
+}: {
+  entityId: string;
+  name?: string;
+  /** Custom icon node — default bulb SVG. */
+  icon?: ReactNode;
+  /** Mini brightness bar when on (default false). */
+  showBrightness?: boolean;
+}) {
   const light = useEntity(entityId);
   const on = light?.state === 'on';
   const label = name ?? light?.attributes.friendly_name ?? entityId;
@@ -36,11 +49,17 @@ export function LightTile({ entityId, name }: { entityId: string; name?: string 
       onClick={() => callService('light', 'toggle', { entity_id: entityId })}
       aria-pressed={on}
     >
-      <span className="rd-light__icon">{BULB_ICON}</span>
+      <span className="rd-light__icon">{icon ?? BULB_ICON}</span>
       <span className="rd-light__name">{label}</span>
-      <span className="rd-light__state">
-        {on ? (brightness !== undefined ? `${brightness} %` : 'an') : 'aus'}
-      </span>
+      {showBrightness && on && brightness !== undefined ? (
+        <span className="rd-light__bar" aria-hidden>
+          <span className="rd-light__bar-fill" style={{ width: `${brightness}%` }} />
+        </span>
+      ) : (
+        <span className="rd-light__state">
+          {on ? (brightness !== undefined ? `${brightness} %` : 'an') : 'aus'}
+        </span>
+      )}
     </button>
   );
 }
@@ -90,25 +109,43 @@ export function EntityRow({
   );
 }
 
+export type GaugeThreshold = { value: number; color: string };
+
 export function Gauge({
   entityId,
   label,
   min = 0,
   max = 100,
   unit,
+  curve = 'linear',
+  thresholds,
 }: {
   entityId: string;
   label?: string;
   min?: number;
   max?: number;
   unit?: string;
+  /** Ease fill width: `sqrt` spreads low values (default `linear`). */
+  curve?: 'linear' | 'sqrt';
+  /** Color steps by absolute value (ascending `value`). */
+  thresholds?: GaugeThreshold[];
 }) {
   const entity = useEntity(entityId);
   const value = stateNumber(entity);
   const name = label ?? entity?.attributes.friendly_name ?? entityId;
   const u = unit ?? (entity?.attributes.unit_of_measurement as string | undefined);
-  const pct =
-    value === undefined ? 0 : Math.min(100, Math.max(0, ((value - min) / (max - min)) * 100));
+  const span = max - min || 1;
+  const rawT = value === undefined ? 0 : Math.min(1, Math.max(0, (value - min) / span));
+  const t = curve === 'sqrt' ? Math.sqrt(rawT) : rawT;
+  const pct = t * 100;
+
+  let fillColor: string | undefined;
+  if (value !== undefined && thresholds?.length) {
+    const sorted = [...thresholds].sort((a, b) => a.value - b.value);
+    for (const th of sorted) {
+      if (value >= th.value) fillColor = th.color;
+    }
+  }
 
   return (
     <div className="rd-card rd-gauge">
@@ -120,7 +157,13 @@ export function Gauge({
         </span>
       </div>
       <div className="rd-bar">
-        <div className="rd-bar__fill" style={{ width: `${pct}%` }} />
+        <div
+          className="rd-bar__fill"
+          style={{
+            width: `${pct}%`,
+            ...(fillColor ? { background: fillColor } : {}),
+          }}
+        />
       </div>
     </div>
   );
@@ -325,29 +368,43 @@ export function CoverCard({
 export function WeatherCard({
   entityId,
   label,
+  showHumidity = true,
+  showWind = false,
+  compact = false,
 }: {
   entityId: string;
   label?: string;
+  showHumidity?: boolean;
+  showWind?: boolean;
+  compact?: boolean;
 }) {
   const weather = useEntity(entityId);
   const name = label ?? weather?.attributes.friendly_name ?? entityId;
   const temp = weather?.attributes.temperature;
   const condition = weather?.attributes.condition as string | undefined;
   const humidity = weather?.attributes.humidity;
+  const windSpeed = weather?.attributes.wind_speed;
+  const windUnit = (weather?.attributes.wind_speed_unit as string | undefined) ?? 'km/h';
 
   return (
-    <div className="rd-card rd-weather-card">
-      <span className="rd-weather-card__name">{name}</span>
+    <div className={`rd-card rd-weather-card${compact ? ' rd-weather-card--compact' : ''}`}>
+      {!compact && <span className="rd-weather-card__name">{name}</span>}
       <div className="rd-weather-card__main">
         <span className="rd-weather-card__icon">{weatherIcon(condition)}</span>
         <span className="rd-weather-card__temp">
           {num(temp !== undefined ? String(temp) : undefined)}
           <small> °C</small>
         </span>
+        {compact && <span className="rd-weather-card__name">{name}</span>}
       </div>
       <div className="rd-weather-card__meta">
         <span>{condition ?? weather?.state ?? '–'}</span>
-        {humidity !== undefined && <span>💧 {num(String(humidity), 0)} %</span>}
+        {showHumidity && humidity !== undefined && (
+          <span>💧 {num(String(humidity), 0)} %</span>
+        )}
+        {showWind && windSpeed !== undefined && (
+          <span>💨 {num(String(windSpeed), 0)} {windUnit}</span>
+        )}
       </div>
     </div>
   );
