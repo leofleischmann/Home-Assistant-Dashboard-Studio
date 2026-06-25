@@ -259,7 +259,7 @@ export function HomePage({ onNavigate }: { onNavigate: (p: ExampleTab) => void }
       </div>
 
       {primaryPower && (
-        <Panel title="3D Energie-Kern" icon="🌐" span>
+        <Panel title="Energie-Orb" icon="⚡" span>
           <EnergyScene3D entityId={primaryPower.entity_id} />
         </Panel>
       )}
