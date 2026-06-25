@@ -117,3 +117,8 @@ export function callService(
 ): Promise<unknown> {
   return hassStore.callService(domain, service, serviceData, target);
 }
+
+/** Raw hass object (for advanced custom dashboards using callApi, etc.). */
+export function getAppHass() {
+  return hassStore.getHass();
+}
