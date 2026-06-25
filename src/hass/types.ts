@@ -38,6 +38,12 @@ export interface AppHass {
   ) => Promise<unknown>;
   /** The live WebSocket connection — used to persist the dashboard code in HA. */
   connection?: HassConnection;
+  /** Home Assistant frontend REST helper (panel only). */
+  callApi?: (
+    method: string,
+    path: string,
+    parameters?: Record<string, unknown>,
+  ) => Promise<unknown>;
   user?: { name: string; is_admin: boolean };
   language?: string;
   [key: string]: unknown;

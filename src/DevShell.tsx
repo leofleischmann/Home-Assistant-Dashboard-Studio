@@ -38,10 +38,22 @@ async function connectToHass(): Promise<void> {
     );
 
   subscribeEntities(connection, (entities: HassEntities) => {
+    const baseUrl = hassUrl.replace(/\/+$/, '');
     const hass: AppHass = {
       states: entities as unknown as AppHass['states'],
       callService,
       connection,
+      callApi: async (method, path) => {
+        const res = await fetch(`${baseUrl}/api/${path}`, {
+          method,
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        if (!res.ok) throw new Error(`HA API ${res.status}`);
+        return res.json();
+      },
     };
     hassStore.setHass(hass);
   });
