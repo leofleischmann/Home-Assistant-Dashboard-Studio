@@ -16,7 +16,7 @@ export const FEATURED_WIDGET_CATALOG: WidgetCatalogEntry[] = [
     category: 'featured',
     domains: ['sun'],
     inserterDefault: true,
-    snippet: (id) => `<SunArc entityId="${id}" showStars showMoon />`,
+    snippet: (id) => `<SunArc entityId="${id}" showStars showMoon size="default" />`,
     Demo: SunArc,
   },
   {
@@ -26,7 +26,7 @@ export const FEATURED_WIDGET_CATALOG: WidgetCatalogEntry[] = [
     domains: ['sensor', 'number', 'input_number'],
     pickExample: pickNumericSensorEntity,
     snippet: (id) =>
-      `<ValueOrb3D entityId="${id}" min={0} max={100} color="#e63a12" />`,
+      `<ValueOrb3D entityId="${id}" min={0} max={100} color="#e63a12" size="default" />`,
     Demo: ValueOrb3DDemo,
   },
   {
@@ -35,7 +35,7 @@ export const FEATURED_WIDGET_CATALOG: WidgetCatalogEntry[] = [
     category: 'featured',
     domains: [],
     optionalEntity: true,
-    snippet: '<LiveClock showSeconds locale="de-DE" />',
+    snippet: '<LiveClock showSeconds locale="de-DE" size="default" />',
     Demo: LiveClockDemo,
   },
   {
@@ -43,7 +43,8 @@ export const FEATURED_WIDGET_CATALOG: WidgetCatalogEntry[] = [
     label: '5-Tage-Vorhersage',
     category: 'featured',
     domains: ['weather'],
-    snippet: (id) => `<WeatherForecastRow entityId="${id}" days={5} />`,
+    snippet: (id) =>
+      `<WeatherForecastRow entityId="${id}" days={5} locale="de-DE" showPrecipitation />`,
     Demo: WeatherForecastRowDemo,
   },
   {
@@ -54,7 +55,8 @@ export const FEATURED_WIDGET_CATALOG: WidgetCatalogEntry[] = [
     pickExample: (entities) =>
       entities.find((e) => e.entity_id.startsWith('binary_sensor.'))?.entity_id ??
       entities.find((e) => e.entity_id.startsWith('light.'))?.entity_id,
-    snippet: (id) => `<Minitimeline entityId="${id}" limit={8} hours={24} />`,
+    snippet: (id) =>
+      `<Minitimeline entityId="${id}" limit={8} hours={24} timeFormat="clock" showRelativeHint />`,
     Demo: MinitimelineDemo,
   },
 ];

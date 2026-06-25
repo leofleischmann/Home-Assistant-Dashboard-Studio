@@ -3,11 +3,12 @@ export {
   Gauge,
   ActionButton,
   BinaryBadge,
+  type GaugeProps,
   type GaugeThreshold,
 } from './generic';
 export { LightTile } from './light';
 export { InputBooleanTile, SelectCard, NumberSlider } from './input';
-export { ClimateCard, HumidifierCard, WaterHeaterCard } from './climate';
+export { ClimateCard, HumidifierCard, WaterHeaterCard, type ClimateCardProps } from './climate';
 export { MediaPlayerCard } from './media';
 export { CameraTile } from './camera';
 export { CoverCard } from './cover';

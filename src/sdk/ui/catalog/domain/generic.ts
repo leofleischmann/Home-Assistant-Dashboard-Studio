@@ -14,7 +14,7 @@ export const GENERIC_DOMAIN_CATALOG: WidgetCatalogEntry[] = [
     category: 'domain',
     domains: ['sensor'],
     snippet: (id) =>
-      `<Stat label="${id.split('.')[1] ?? 'Sensor'}" value={num(useEntity('${id}')?.state)} />`,
+      `<Stat label="${id.split('.')[1] ?? 'Sensor'}" value={num(useEntity('${id}')?.state)} color="var(--rd-accent)" />`,
     Demo: StatDemo,
   },
   {
@@ -23,7 +23,7 @@ export const GENERIC_DOMAIN_CATALOG: WidgetCatalogEntry[] = [
     category: 'domain',
     domains: ['sensor'],
     inserterDefault: true,
-    snippet: (id) => `<Gauge entityId="${id}" min={0} max={100} />`,
+    snippet: (id) => `<Gauge entityId="${id}" min={0} max={100} color="var(--rd-accent)" />`,
     Demo: Gauge,
   },
   {
@@ -43,7 +43,7 @@ export const GENERIC_DOMAIN_CATALOG: WidgetCatalogEntry[] = [
     domains: ['sensor'],
     pickExample: (entities) => pickBatteryEntity(entities) ?? pickNumericSensorEntity(entities),
     snippet: (id) =>
-      `<CircularProgress value={Number(useEntity('${id}', { fallback: '0' }).state) || 0} max={100} label="…" />`,
+      `<CircularProgress value={Number(useEntity('${id}', { fallback: '0' }).state) || 0} max={100} warningBelow={30} criticalBelow={15} label="…" />`,
     Demo: CircularProgressDemo,
   },
   {

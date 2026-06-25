@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { callService, useEntity } from '../../../hass/hooks';
 import {
   defaultEntityService,
@@ -53,15 +54,7 @@ export function EntityRow({
 
 export type GaugeThreshold = { value: number; color: string };
 
-export function Gauge({
-  entityId,
-  label,
-  min = 0,
-  max = 100,
-  unit,
-  curve = 'linear',
-  thresholds,
-}: {
+export type GaugeProps = {
   entityId: string;
   label?: string;
   min?: number;
@@ -69,9 +62,22 @@ export function Gauge({
   unit?: string;
   /** Ease fill width: `sqrt` spreads low values (default `linear`). */
   curve?: 'linear' | 'sqrt';
+  /** Default bar fill when no threshold matches. */
+  color?: string;
   /** Color steps by absolute value (ascending `value`). */
   thresholds?: GaugeThreshold[];
-}) {
+};
+
+export function Gauge({
+  entityId,
+  label,
+  min = 0,
+  max = 100,
+  unit,
+  curve = 'linear',
+  color,
+  thresholds,
+}: GaugeProps) {
   const entity = useEntity(entityId);
   const value = stateNumber(entity);
   const name = label ?? entity?.attributes.friendly_name ?? entityId;
@@ -81,13 +87,17 @@ export function Gauge({
   const t = curve === 'sqrt' ? Math.sqrt(rawT) : rawT;
   const pct = t * 100;
 
-  let fillColor: string | undefined;
+  let fillColor = color;
   if (value !== undefined && thresholds?.length) {
     const sorted = [...thresholds].sort((a, b) => a.value - b.value);
     for (const th of sorted) {
       if (value >= th.value) fillColor = th.color;
     }
   }
+
+  useEffect(() => {
+    console.log('[Debug Gauge]:', { entityId, value, min, max, curve, color, pct: pct.toFixed(1) });
+  }, [entityId, value, min, max, curve, color, pct]);
 
   return (
     <div className="rd-card rd-gauge">

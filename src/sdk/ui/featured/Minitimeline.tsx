@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useLogbook } from '../../hass/hooks';
 import { entityDisplayNameForId, relativeTime, stateLabel } from '../../format';
 
@@ -8,7 +9,15 @@ export type MinitimelineProps = {
   domain?: string;
   hours?: number;
   limit?: number;
+  /** Section title — pass empty string to hide. */
   title?: string;
+  /** BCP 47 locale for clock column (default `de-DE`). */
+  locale?: string;
+  /** Left column: `clock` (HH:MM) or `relative` (vor 5 Min). */
+  timeFormat?: 'clock' | 'relative';
+  /** Show relative hint under each entry (default true). */
+  showRelativeHint?: boolean;
+  emptyLabel?: string;
 };
 
 function formatEntryLine(entry: {
@@ -26,6 +35,15 @@ function formatEntryLine(entry: {
   return entry.name;
 }
 
+function formatTimeColumn(
+  when: Date,
+  timeFormat: 'clock' | 'relative',
+  locale: string,
+): string {
+  if (timeFormat === 'relative') return relativeTime(when);
+  return when.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
+}
+
 /** Vertical timeline of recent logbook events. */
 export function Minitimeline({
   entityId,
@@ -33,6 +51,10 @@ export function Minitimeline({
   hours = 24,
   limit = 8,
   title = 'Letzte Aktivität',
+  locale = 'de-DE',
+  timeFormat = 'clock',
+  showRelativeHint = true,
+  emptyLabel = 'Keine Einträge im Zeitraum',
 }: MinitimelineProps) {
   const { entries, loading } = useLogbook({
     entityId,
@@ -41,14 +63,26 @@ export function Minitimeline({
     limit,
   });
 
+  useEffect(() => {
+    console.log('[Debug Minitimeline]:', {
+      entityId,
+      domain,
+      hours,
+      limit,
+      timeFormat,
+      showRelativeHint,
+      count: entries.length,
+    });
+  }, [entityId, domain, hours, limit, timeFormat, showRelativeHint, entries.length]);
+
   return (
     <div className="rd-card rd-minitimeline">
-      {title && <h3 className="rd-minitimeline__title">{title}</h3>}
+      {title ? <h3 className="rd-minitimeline__title">{title}</h3> : null}
 
       {loading && entries.length === 0 ? (
         <p className="rd-empty">Logbook lädt…</p>
       ) : entries.length === 0 ? (
-        <p className="rd-empty">Keine Einträge im Zeitraum</p>
+        <p className="rd-empty">{emptyLabel}</p>
       ) : (
         <ol className="rd-minitimeline__list">
           {entries.map((entry) => {
@@ -59,16 +93,15 @@ export function Minitimeline({
             return (
               <li key={key} className="rd-minitimeline__item">
                 <span className="rd-minitimeline__time">
-                  {entry.when.toLocaleTimeString('de-DE', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
+                  {formatTimeColumn(entry.when, timeFormat, locale)}
                 </span>
                 <span className="rd-minitimeline__dot" aria-hidden />
                 <div className="rd-minitimeline__body">
                   <strong>{label}</strong>
                   <span>{formatEntryLine(entry)}</span>
-                  <small>{relativeTime(entry.when)}</small>
+                  {showRelativeHint && timeFormat === 'clock' && (
+                    <small>{relativeTime(entry.when)}</small>
+                  )}
                 </div>
               </li>
             );

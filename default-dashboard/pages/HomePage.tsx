@@ -194,8 +194,8 @@ export function HomePage({ onNavigate }: { onNavigate: (p: ExampleTab) => void }
             </div>
           </div>
           <div className="rd-hero__right">
-            <LiveClock />
-            <SunArc />
+            <LiveClock showSeconds locale="de-DE" />
+            <SunArc size="compact" />
           </div>
         </div>
       </header>

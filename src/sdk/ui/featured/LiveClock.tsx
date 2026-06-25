@@ -13,6 +13,8 @@ export type LiveClockProps = {
   hour12?: boolean;
   /** Show date line below time (default true). */
   showDate?: boolean;
+  /** `compact` for sidebars; default is hero-sized. */
+  size?: 'compact' | 'default';
 };
 
 /** Large clock + date — isolated tick via useTime(1000). */
@@ -22,6 +24,7 @@ export function LiveClock({
   showSeconds = true,
   hour12 = false,
   showDate = true,
+  size = 'default',
 }: LiveClockProps = {}) {
   const now = useTime(1000);
 
@@ -58,11 +61,11 @@ export function LiveClock({
   const date = now.toLocaleDateString(locale, dateOpts);
 
   useEffect(() => {
-    console.log('[Debug LiveClock]:', { timeZone, locale, showSeconds, hour12, showDate });
-  }, [timeZone, locale, showSeconds, hour12, showDate]);
+    console.log('[Debug LiveClock]:', { timeZone, locale, showSeconds, hour12, showDate, size });
+  }, [timeZone, locale, showSeconds, hour12, showDate, size]);
 
   return (
-    <div className="rd-clock">
+    <div className={`rd-clock${size === 'compact' ? ' rd-clock--compact' : ''}`}>
       <div className="rd-clock__time">
         <strong>{time}</strong>
         {showSeconds && <span className="rd-clock__sec">{sec}</span>}

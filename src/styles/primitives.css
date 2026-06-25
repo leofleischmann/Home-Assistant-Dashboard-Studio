@@ -351,6 +351,13 @@
 .rd-stat.is-accent .rd-stat__label {
   color: rgba(255, 255, 255, 0.85);
 }
+.rd-stat__sub {
+  font-size: 0.78rem;
+  color: var(--rd-text-2);
+}
+.rd-stat.is-accent .rd-stat__sub {
+  color: rgba(255, 255, 255, 0.75);
+}
 
 /* ── Plant ───────────────────────────────────────────────── */
 .rd-plant {
