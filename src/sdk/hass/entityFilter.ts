@@ -1,6 +1,19 @@
 import type { HassEntity } from './types';
 import { registryStore } from './registryStore';
 
+/** Domains to watch for `useEntities` — `*` when any entity may affect the filter. */
+export function subscriptionDomainsForFilter(
+  filter: EntityFilter,
+): readonly string[] | '*' {
+  if (filter.areaId || filter.labelId || filter.state || filter.pattern || filter.deviceClass) {
+    return '*';
+  }
+  if (filter.domain) {
+    return Array.isArray(filter.domain) ? filter.domain : [filter.domain];
+  }
+  return '*';
+}
+
 export type EntityFilter = {
   /** e.g. "sensor" or ["light", "switch"] */
   domain?: string | string[];

@@ -4,13 +4,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
-from homeassistant.core import callback
+from homeassistant.config_entries import ConfigFlow, ConfigFlowResult  # pyright: ignore[reportMissingImports]
+from homeassistant.core import callback  # pyright: ignore[reportMissingImports]
 
 from .const import DOMAIN, PANEL_TITLE
 
 if TYPE_CHECKING:
-    from homeassistant.config_entries import ConfigEntry, OptionsFlow
+    from homeassistant.config_entries import ConfigEntry, OptionsFlow  # pyright: ignore[reportMissingImports]
 
 
 class ReactDashboardStudioConfigFlow(ConfigFlow, domain=DOMAIN):

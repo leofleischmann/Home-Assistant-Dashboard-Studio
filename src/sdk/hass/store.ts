@@ -4,30 +4,56 @@ type Listener = () => void;
 
 const EMPTY_ENTITIES: HassEntity[] = [];
 
+function addKeyedListener(
+  map: Map<string, Set<Listener>>,
+  key: string,
+  listener: Listener,
+): () => void {
+  let set = map.get(key);
+  if (!set) {
+    set = new Set();
+    map.set(key, set);
+  }
+  set.add(listener);
+  return () => {
+    set!.delete(listener);
+    if (set!.size === 0) map.delete(key);
+  };
+}
+
+function notifySet(set: Set<Listener> | undefined): void {
+  if (!set) return;
+  for (const listener of set) listener();
+}
+
+function domainOf(entityId: string): string {
+  const dot = entityId.indexOf('.');
+  return dot === -1 ? entityId : entityId.slice(0, dot);
+}
+
 /**
- * A tiny external store that holds the current `hass` object and lets React
- * components subscribe to it via useSyncExternalStore.
- *
- * Why this exists: HA replaces `hass.states` on EVERY state change of ANY
- * entity. Reading it naively would re-render the whole dashboard constantly.
- * Instead, each hook subscribes here and returns a per-entity snapshot.
- * Because HA keeps the object reference of unchanged entities stable,
- * useSyncExternalStore bails out of re-rendering components whose specific
- * entity did not change — even though every listener is pinged.
+ * External store for Home Assistant state. React hooks subscribe narrowly
+ * (per entity, per domain, or all entities) so unrelated state changes do
+ * not run every getSnapshot in the dashboard.
  */
 class HassStore {
   private hass: AppHass | null = null;
   private narrow = false;
-  private listeners = new Set<Listener>();
   private domainIndex = new Map<string, HassEntity[]>();
+
+  /** Theme, dark mode, hass connection — not entity states. */
+  private hassMetaListeners = new Set<Listener>();
+  private narrowListeners = new Set<Listener>();
+  /** Any entity state change (unscoped lists, entity browser, …). */
+  private allEntitiesListeners = new Set<Listener>();
+  private entityListeners = new Map<string, Set<Listener>>();
+  private domainListeners = new Map<string, Set<Listener>>();
 
   private rebuildDomainIndex(states: Record<string, HassEntity> | undefined): void {
     const next = new Map<string, HassEntity[]>();
     if (states) {
       for (const id in states) {
-        const dot = id.indexOf('.');
-        if (dot === -1) continue;
-        const domain = id.slice(0, dot);
+        const domain = domainOf(id);
         let list = next.get(domain);
         if (!list) {
           list = [];
@@ -39,39 +65,135 @@ class HassStore {
     this.domainIndex = next;
   }
 
+  private themeSignature(hass: AppHass | null): string {
+    if (!hass) return '';
+    return `${String(hass.selectedTheme ?? '')}\0${String(hass.darkMode ?? '')}`;
+  }
+
+  private collectEntityChanges(
+    prev: AppHass | null,
+    next: AppHass,
+  ): { entities: Set<string>; domains: Set<string>; bootstrap: boolean } {
+    if (!prev) {
+      return { entities: new Set(), domains: new Set(), bootstrap: true };
+    }
+
+    const entities = new Set<string>();
+    const domains = new Set<string>();
+    const prevStates = prev.states;
+    const nextStates = next.states;
+
+    if (prevStates !== nextStates) {
+      for (const id in prevStates) {
+        if (prevStates[id] !== nextStates[id]) {
+          entities.add(id);
+          domains.add(domainOf(id));
+        }
+      }
+      for (const id in nextStates) {
+        if (prevStates[id] !== nextStates[id]) {
+          entities.add(id);
+          domains.add(domainOf(id));
+        }
+      }
+    }
+
+    return { entities, domains, bootstrap: false };
+  }
+
+  private notifyAllEntityChannels(): void {
+    notifySet(this.allEntitiesListeners);
+    for (const set of this.entityListeners.values()) notifySet(set);
+    for (const set of this.domainListeners.values()) notifySet(set);
+  }
+
+  private notifyEntityChanges(entities: Set<string>, domains: Set<string>): void {
+    if (entities.size === 0) return;
+    notifySet(this.allEntitiesListeners);
+    for (const id of entities) notifySet(this.entityListeners.get(id));
+    for (const domain of domains) notifySet(this.domainListeners.get(domain));
+  }
+
+  /** @deprecated Prefer the targeted subscribe* methods below. */
+  subscribe = (listener: Listener): (() => void) =>
+    this.subscribeAllEntities(listener);
+
+  subscribeHassMeta = (listener: Listener): (() => void) => {
+    this.hassMetaListeners.add(listener);
+    return () => {
+      this.hassMetaListeners.delete(listener);
+    };
+  };
+
+  subscribeNarrow = (listener: Listener): (() => void) => {
+    this.narrowListeners.add(listener);
+    return () => {
+      this.narrowListeners.delete(listener);
+    };
+  };
+
+  subscribeAllEntities = (listener: Listener): (() => void) => {
+    this.allEntitiesListeners.add(listener);
+    return () => {
+      this.allEntitiesListeners.delete(listener);
+    };
+  };
+
+  subscribeEntity = (entityId: string, listener: Listener): (() => void) =>
+    addKeyedListener(this.entityListeners, entityId, listener);
+
+  subscribeDomain = (domain: string, listener: Listener): (() => void) =>
+    addKeyedListener(this.domainListeners, domain, listener);
+
+  subscribeDomains = (
+    domains: readonly string[] | '*',
+    listener: Listener,
+  ): (() => void) => {
+    if (domains === '*') return this.subscribeAllEntities(listener);
+    const unsubs = domains.map((domain) => this.subscribeDomain(domain, listener));
+    return () => {
+      for (const unsub of unsubs) unsub();
+    };
+  };
+
   /** Called by the panel (prod) or the dev harness whenever state changes. */
   setHass = (hass: AppHass): void => {
+    const prev = this.hass;
+    const metaChanged =
+      !prev ||
+      prev !== hass ||
+      this.themeSignature(prev) !== this.themeSignature(hass);
+    const { entities, domains, bootstrap } = this.collectEntityChanges(prev, hass);
+
     this.hass = hass;
     this.rebuildDomainIndex(hass.states);
-    for (const listener of this.listeners) listener();
+
+    if (bootstrap) {
+      notifySet(this.hassMetaListeners);
+      this.notifyAllEntityChannels();
+      return;
+    }
+
+    if (metaChanged) notifySet(this.hassMetaListeners);
+    this.notifyEntityChanges(entities, domains);
   };
 
   getHass = (): AppHass | null => this.hass;
 
-  /** HA tells the panel whether it is rendered in a narrow (mobile) layout. */
   setNarrow = (narrow: boolean): void => {
     if (this.narrow === narrow) return;
     this.narrow = narrow;
-    for (const listener of this.listeners) listener();
+    notifySet(this.narrowListeners);
   };
 
   getNarrow = (): boolean => this.narrow;
 
-  subscribe = (listener: Listener): (() => void) => {
-    this.listeners.add(listener);
-    return () => {
-      this.listeners.delete(listener);
-    };
-  };
-
   getEntity = (entityId: string): HassEntity | undefined =>
     this.hass?.states?.[entityId];
 
-  /** O(1) lookup of all entities in a domain (rebuilt on each hass update). */
   getEntitiesByDomain = (domain: string): readonly HassEntity[] =>
     this.domainIndex.get(domain) ?? EMPTY_ENTITIES;
 
-  /** All entities currently known to HA. */
   getAllEntities = (): readonly HassEntity[] => {
     const states = this.hass?.states;
     if (!states) return EMPTY_ENTITIES;

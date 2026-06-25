@@ -18,7 +18,7 @@ import {
 } from './cachedRest';
 import { normalizeIds } from './restCache';
 import { fetchCalendarEvents, type CalendarEvent } from './calendar';
-import { filterEntities, type EntityFilter } from './entityFilter';
+import { filterEntities, subscriptionDomainsForFilter, type EntityFilter } from './entityFilter';
 import {
   registryStore,
   type EntityRegistryEntry,
@@ -54,7 +54,11 @@ export function useEntity(entityId: KnownEntityId): HassEntity | undefined {
     () => hassStore.getEntity(entityId),
     [entityId],
   );
-  return useSyncExternalStore(hassStore.subscribe, getSnapshot);
+  const subscribe = useCallback(
+    (listener: () => void) => hassStore.subscribeEntity(entityId, listener),
+    [entityId],
+  );
+  return useSyncExternalStore(subscribe, getSnapshot);
 }
 
 /** Reactive shortcut for just the state string, e.g. "on" / "23.4". */
@@ -63,7 +67,11 @@ export function useEntityState(entityId: KnownEntityId): string | undefined {
     () => hassStore.getEntity(entityId)?.state,
     [entityId],
   );
-  return useSyncExternalStore(hassStore.subscribe, getSnapshot);
+  const subscribe = useCallback(
+    (listener: () => void) => hassStore.subscribeEntity(entityId, listener),
+    [entityId],
+  );
+  return useSyncExternalStore(subscribe, getSnapshot);
 }
 
 /** Reactive access to a single entity attribute. */
@@ -75,7 +83,11 @@ export function useEntityAttribute<T = unknown>(
     () => hassStore.getEntity(entityId)?.attributes[attribute] as T | undefined,
     [entityId, attribute],
   );
-  return useSyncExternalStore(hassStore.subscribe, getSnapshot);
+  const subscribe = useCallback(
+    (listener: () => void) => hassStore.subscribeEntity(entityId, listener),
+    [entityId],
+  );
+  return useSyncExternalStore(subscribe, getSnapshot);
 }
 
 /**
@@ -105,7 +117,8 @@ export function useEntities(filter: EntityFilter = {}): HassEntity[] {
 
   const subscribe = useCallback(
     (listener: () => void) => {
-      const unsubHass = hassStore.subscribe(listener);
+      const domains = subscriptionDomainsForFilter(JSON.parse(filterKey) as EntityFilter);
+      const unsubHass = hassStore.subscribeDomains(domains, listener);
       const unsubRegistry = needsRegistry
         ? registryStore.subscribe(listener)
         : () => {};
@@ -114,7 +127,7 @@ export function useEntities(filter: EntityFilter = {}): HassEntity[] {
         unsubRegistry();
       };
     },
-    [needsRegistry],
+    [needsRegistry, filterKey],
   );
 
   return useSyncExternalStore(subscribe, getSnapshot);
@@ -243,13 +256,17 @@ export function useEntitiesByDomain(domain: string): HassEntity[] {
     cacheRef.current = next;
     return next;
   }, [domain]);
-  return useSyncExternalStore(hassStore.subscribe, getSnapshot);
+  const subscribe = useCallback(
+    (listener: () => void) => hassStore.subscribeDomain(domain, listener),
+    [domain],
+  );
+  return useSyncExternalStore(subscribe, getSnapshot);
 }
 
 /** True once Home Assistant has handed us a hass object (connected). */
 export function useHassReady(): boolean {
   return useSyncExternalStore(
-    hassStore.subscribe,
+    hassStore.subscribeHassMeta,
     () => hassStore.getHass() !== null,
   );
 }
@@ -260,7 +277,7 @@ export function useHassReady(): boolean {
  * editor stays hidden on mobile even when HA hasn't set `narrow` yet.
  */
 export function useIsMobile(breakpoint = 860): boolean {
-  const haNarrow = useSyncExternalStore(hassStore.subscribe, hassStore.getNarrow);
+  const haNarrow = useSyncExternalStore(hassStore.subscribeNarrow, hassStore.getNarrow);
 
   const query = `(max-width: ${breakpoint}px)`;
   const [matches, setMatches] = useState(
