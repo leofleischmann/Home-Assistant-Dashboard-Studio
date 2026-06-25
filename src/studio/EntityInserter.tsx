@@ -66,7 +66,7 @@ function useEntityMatches(query: string, domain: string): HassEntity[] {
     return next;
   }, [query, domain]);
 
-  return useSyncExternalStore(hassStore.subscribe, getSnapshot, () => []);
+  return useSyncExternalStore(hassStore.subscribeAllEntities, getSnapshot, () => []);
 }
 
 function EntityRow({

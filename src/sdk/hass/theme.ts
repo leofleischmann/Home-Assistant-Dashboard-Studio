@@ -35,13 +35,13 @@ function readTheme(): ThemeVars {
 
 /** Home Assistant theme colors as CSS-ready values. */
 export function useTheme(): ThemeVars {
-  return useSyncExternalStore(hassStore.subscribe, readTheme, readTheme);
+  return useSyncExternalStore(hassStore.subscribeHassMeta, readTheme, readTheme);
 }
 
 /** Whether HA frontend is in dark mode. */
 export function useDarkMode(): boolean {
   return useSyncExternalStore(
-    hassStore.subscribe,
+    hassStore.subscribeHassMeta,
     () => {
       const hass = hassStore.getHass();
       if (typeof hass?.darkMode === 'boolean') return hass.darkMode;

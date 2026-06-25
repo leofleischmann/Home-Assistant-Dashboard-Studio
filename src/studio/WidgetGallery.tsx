@@ -67,7 +67,7 @@ export function WidgetGallery({
   copyToClipboard: boolean;
 }) {
   const getSnapshot = useCallback(() => hassStore.getHass()?.states ?? {}, []);
-  const states = useSyncExternalStore(hassStore.subscribe, getSnapshot, () => ({}));
+  const states = useSyncExternalStore(hassStore.subscribeAllEntities, getSnapshot, () => ({}));
 
   return (
     <div className="rd-widget-gallery">
