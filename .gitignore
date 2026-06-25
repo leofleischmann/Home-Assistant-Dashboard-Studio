@@ -1,0 +1,9 @@
+node_modules
+dist
+.env.local
+*.local
+.DS_Store
+.claude
+
+# Local working copy created by scripts/sync.mjs (your dashboard, not this repo)
+dashboard/

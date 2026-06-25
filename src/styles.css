@@ -1,0 +1,653 @@
+/*
+ * Rendered inside Home Assistant's light DOM, so HA theme variables
+ * (--primary-color, --card-background-color, …) are available and used with
+ * fallbacks — matching the user's theme in production, looking fine standalone.
+ */
+.rd-root {
+  --rd-bg: var(--primary-background-color, #f3f4f8);
+  --rd-card-bg: var(--card-background-color, #ffffff);
+  --rd-text: var(--primary-text-color, #1b1c22);
+  --rd-text-2: var(--secondary-text-color, #6b6e7b);
+  --rd-accent: var(--primary-color, #2f7bf6);
+  --rd-border: var(--divider-color, rgba(20, 22, 40, 0.08));
+  --rd-radius: var(--ha-card-border-radius, 18px);
+  --rd-ok: #2faa57;
+  --rd-warn: #e0a100;
+  --rd-danger: #e0483d;
+  --rd-shadow: 0 1px 2px rgba(16, 18, 40, 0.04), 0 6px 20px rgba(16, 18, 40, 0.05);
+
+  box-sizing: border-box;
+  min-height: 100%;
+  padding: 28px clamp(16px, 4vw, 48px);
+  background: var(--rd-bg);
+  color: var(--rd-text);
+  font-family: var(
+    --paper-font-body1_-_font-family,
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    sans-serif
+  );
+}
+.rd-root *,
+.rd-root *::before,
+.rd-root *::after {
+  box-sizing: border-box;
+}
+
+/* ── Card base ───────────────────────────────────────────── */
+.rd-card {
+  background: var(--rd-card-bg);
+  border: 1px solid var(--rd-border);
+  border-radius: var(--rd-radius);
+  box-shadow: var(--rd-shadow);
+  padding: 18px;
+}
+
+/* ── Topbar ──────────────────────────────────────────────── */
+.rd-topbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
+}
+.rd-topbar__greet {
+  margin: 0;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 700;
+}
+.rd-topbar__date {
+  margin: 4px 0 0;
+  color: var(--rd-text-2);
+  text-transform: capitalize;
+}
+.rd-topbar__right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.rd-weather {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.2;
+}
+.rd-weather__icon {
+  font-size: 1.6rem;
+}
+.rd-weather__temp {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+.rd-weather__sub {
+  font-size: 0.78rem;
+  color: var(--rd-text-2);
+}
+.rd-people {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.rd-person {
+  font-size: 0.85rem;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--rd-border);
+  color: var(--rd-text-2);
+  white-space: nowrap;
+}
+.rd-person.is-home {
+  color: var(--rd-ok);
+  border-color: color-mix(in srgb, var(--rd-ok) 35%, transparent);
+  background: color-mix(in srgb, var(--rd-ok) 10%, transparent);
+}
+
+/* ── Section ─────────────────────────────────────────────── */
+.rd-section {
+  margin-bottom: 28px;
+}
+.rd-section__title {
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--rd-text-2);
+  margin: 0 0 12px 2px;
+}
+
+/* ── Grids ───────────────────────────────────────────────── */
+.rd-grid {
+  display: grid;
+  gap: 14px;
+}
+.rd-grid--rooms {
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+}
+.rd-grid--devices {
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  margin-top: 14px;
+}
+.rd-cols {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 28px;
+  align-items: start;
+}
+
+/* ── Room card ───────────────────────────────────────────── */
+.rd-room {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.rd-room__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.rd-room__name {
+  font-weight: 600;
+}
+.rd-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--rd-border);
+}
+.rd-dot.is-on {
+  background: var(--rd-ok);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--rd-ok) 20%, transparent);
+}
+.rd-room__temp {
+  font-size: 2.1rem;
+  font-weight: 700;
+  line-height: 1;
+}
+.rd-room__temp small {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--rd-text-2);
+}
+.rd-room__metrics {
+  display: flex;
+  gap: 14px;
+  font-size: 0.85rem;
+  color: var(--rd-text-2);
+}
+.rd-pill {
+  margin-top: 4px;
+  align-self: flex-start;
+  font: inherit;
+  font-size: 0.8rem;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--rd-border);
+  background: transparent;
+  color: var(--rd-text-2);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.rd-pill.is-on {
+  color: #fff;
+  background: var(--rd-accent);
+  border-color: var(--rd-accent);
+}
+.rd-pill:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ── Device / power card ─────────────────────────────────── */
+.rd-device {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.rd-device__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.rd-device__name {
+  font-weight: 600;
+}
+.rd-device__power {
+  font-size: 1.8rem;
+  font-weight: 700;
+  line-height: 1;
+}
+.rd-device__power small {
+  font-size: 0.9rem;
+  color: var(--rd-text-2);
+}
+.rd-device__foot {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  color: var(--rd-text-2);
+}
+.rd-bar {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--rd-border);
+  overflow: hidden;
+}
+.rd-bar__fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--rd-accent), #7aa8ff);
+  transition: width 0.4s ease;
+}
+
+/* iOS-style toggle */
+.rd-switch {
+  width: 44px;
+  height: 26px;
+  border-radius: 999px;
+  border: none;
+  background: var(--rd-border);
+  position: relative;
+  cursor: pointer;
+  transition: background 0.18s;
+  padding: 0;
+}
+.rd-switch.is-on {
+  background: var(--rd-ok);
+}
+.rd-switch__knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  transition: transform 0.18s;
+}
+.rd-switch.is-on .rd-switch__knob {
+  transform: translateX(18px);
+}
+.rd-switch:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── Live power hero ─────────────────────────────────────── */
+.rd-livepower {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--rd-accent) 14%, var(--rd-card-bg)),
+    var(--rd-card-bg)
+  );
+}
+.rd-livepower__label {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--rd-text-2);
+}
+.rd-livepower__value {
+  font-size: 2.4rem;
+  font-weight: 800;
+  line-height: 1;
+}
+.rd-livepower__value small {
+  font-size: 1rem;
+  color: var(--rd-text-2);
+}
+.rd-livepower__proj {
+  text-align: right;
+  font-weight: 700;
+}
+.rd-livepower__proj small {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: var(--rd-text-2);
+}
+
+/* ── Batteries ───────────────────────────────────────────── */
+.rd-batts {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.rd-batt {
+  display: grid;
+  grid-template-columns: 1fr 90px 42px;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.88rem;
+}
+.rd-batt__name {
+  color: var(--rd-text-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rd-batt__track {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--rd-border);
+  overflow: hidden;
+}
+.rd-batt__fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+.rd-batt__val {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+/* ── Stat tile ───────────────────────────────────────────── */
+.rd-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.rd-stat__label {
+  font-size: 0.82rem;
+  color: var(--rd-text-2);
+}
+.rd-stat__value {
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+.rd-stat.is-accent {
+  color: #fff;
+  background: var(--rd-accent);
+  border-color: var(--rd-accent);
+}
+.rd-stat.is-accent .rd-stat__label {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* ── Plant ───────────────────────────────────────────────── */
+.rd-plant {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.rd-plant__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+}
+.rd-tag {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+.rd-tag.is-ok {
+  color: var(--rd-ok);
+  background: color-mix(in srgb, var(--rd-ok) 14%, transparent);
+}
+.rd-tag.is-danger {
+  color: var(--rd-danger);
+  background: color-mix(in srgb, var(--rd-danger) 14%, transparent);
+}
+.rd-plant__moist {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--rd-text-2);
+}
+.rd-plant__bar {
+  height: 10px;
+  border-radius: 999px;
+  background: var(--rd-border);
+  overflow: hidden;
+}
+.rd-plant__fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #3aa6c9, #36c98f);
+  transition: width 0.4s ease;
+}
+.rd-plant__foot {
+  display: flex;
+  gap: 18px;
+  font-size: 0.9rem;
+  color: var(--rd-text-2);
+}
+
+/* ── Showcase: home layout ───────────────────────────────── */
+.rd-home {
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+}
+.rd-home__split {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 26px;
+  align-items: start;
+}
+@media (max-width: 760px) {
+  .rd-home__split {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Showcase: hero header ───────────────────────────────── */
+.rd-hero {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: clamp(20px, 3vw, 32px);
+  border-radius: calc(var(--rd-radius) + 6px);
+  color: #fff;
+  /* Derived from the HA theme's primary color so the header fits any theme,
+     with a vivid violet companion stop. Falls back to a blue→violet sweep. */
+  background: linear-gradient(
+    135deg,
+    var(--primary-color, #4f7cff) 0%,
+    color-mix(in srgb, var(--primary-color, #4f7cff) 60%, #8b4bff) 100%
+  );
+  box-shadow: 0 18px 40px -18px
+    color-mix(in srgb, var(--primary-color, #4f7cff) 60%, transparent);
+}
+.rd-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 85% -10%, rgba(255, 255, 255, 0.35), transparent 45%),
+    radial-gradient(circle at 10% 120%, rgba(255, 255, 255, 0.18), transparent 40%);
+  pointer-events: none;
+}
+.rd-hero__left,
+.rd-hero__weather {
+  position: relative;
+  z-index: 1;
+}
+.rd-hero__clock {
+  margin: 0;
+  font-size: clamp(2.4rem, 7vw, 3.6rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.rd-hero__greet {
+  margin: 10px 0 2px;
+  font-size: clamp(1.1rem, 2.4vw, 1.5rem);
+  font-weight: 600;
+}
+.rd-hero__date {
+  margin: 0;
+  opacity: 0.82;
+  text-transform: capitalize;
+  font-size: 0.95rem;
+}
+.rd-hero__weather {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+  line-height: 1.15;
+}
+.rd-hero__wicon {
+  font-size: 2.6rem;
+}
+.rd-hero__wtemp {
+  font-size: 2rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.rd-hero__wsub {
+  font-size: 0.82rem;
+  opacity: 0.85;
+  max-width: 180px;
+}
+
+/* ── Showcase: stat chips row ────────────────────────────── */
+.rd-chips {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 14px;
+}
+.rd-chip {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 18px;
+  border-radius: var(--rd-radius);
+  background: var(--rd-card-bg);
+  border: 1px solid var(--rd-border);
+  box-shadow: var(--rd-shadow);
+}
+.rd-chip__value {
+  font-size: 1.7rem;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.rd-chip__value small {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--rd-text-2);
+}
+.rd-chip__label {
+  font-size: 0.8rem;
+  color: var(--rd-text-2);
+}
+.rd-chip__icon {
+  font-size: 1.1rem;
+  margin-bottom: 2px;
+}
+
+/* ── Showcase: light tiles ───────────────────────────────── */
+.rd-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 14px;
+}
+.rd-light {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  border-radius: var(--rd-radius);
+  border: 1px solid var(--rd-border);
+  background: var(--rd-card-bg);
+  box-shadow: var(--rd-shadow);
+  color: var(--rd-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease,
+    background 0.2s ease;
+}
+.rd-light:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px -14px rgba(20, 22, 40, 0.45);
+}
+.rd-light__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  background: var(--rd-border);
+  color: var(--rd-text-2);
+  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+.rd-light__name {
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+.rd-light__state {
+  font-size: 0.8rem;
+  color: var(--rd-text-2);
+}
+.rd-light.is-on {
+  border-color: color-mix(in srgb, #f6c344 50%, var(--rd-border));
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, #f6c344 14%, var(--rd-card-bg)),
+    var(--rd-card-bg)
+  );
+}
+.rd-light.is-on .rd-light__icon {
+  background: linear-gradient(160deg, #ffd76a, #f4a300);
+  color: #5a3b00;
+  box-shadow: 0 0 0 5px color-mix(in srgb, #f6c344 18%, transparent),
+    0 8px 18px -6px rgba(244, 163, 0, 0.6);
+}
+.rd-light.is-on .rd-light__state {
+  color: #c98a00;
+  font-weight: 600;
+}
+
+/* ── Showcase: empty hint ────────────────────────────────── */
+.rd-empty {
+  padding: 22px;
+  border-radius: var(--rd-radius);
+  border: 1px dashed var(--rd-border);
+  color: var(--rd-text-2);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+/* ── Loading ─────────────────────────────────────────────── */
+.rd-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  min-height: 100vh;
+  color: var(--secondary-text-color, #6b6e7b);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+.rd-spinner {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 3px solid rgba(120, 130, 160, 0.2);
+  border-top-color: var(--primary-color, #2f7bf6);
+  animation: rd-spin 0.8s linear infinite;
+}
+@keyframes rd-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
