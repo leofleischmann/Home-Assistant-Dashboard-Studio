@@ -48,7 +48,7 @@ export const DOMAIN_WIDGET_CATALOG: WidgetCatalogEntry[] = [
     category: 'domain',
     domains: ['sensor'],
     inserterDefault: true,
-    snippet: (id) => `<Gauge entityId="${id}" />`,
+    snippet: (id) => `<Gauge entityId="${id}" min={0} max={100} />`,
     Demo: Gauge,
   },
   {
@@ -57,7 +57,7 @@ export const DOMAIN_WIDGET_CATALOG: WidgetCatalogEntry[] = [
     category: 'domain',
     domains: ['sensor'],
     pickExample: pickNumericSensorEntity,
-    snippet: '<SparkChart series={[…]} />',
+    snippet: '<SparkChart series={[…]} height={88} strokeWidth={2} />',
     Demo: SparkDemo,
   },
   {
@@ -84,7 +84,7 @@ export const DOMAIN_WIDGET_CATALOG: WidgetCatalogEntry[] = [
     category: 'domain',
     domains: ['light'],
     inserterDefault: true,
-    snippet: (id) => `<LightTile entityId="${id}" />`,
+    snippet: (id) => `<LightTile entityId="${id}" showBrightness />`,
     Demo: LightTile,
   },
   {
@@ -120,7 +120,7 @@ export const DOMAIN_WIDGET_CATALOG: WidgetCatalogEntry[] = [
     category: 'domain',
     domains: ['weather'],
     inserterDefault: true,
-    snippet: (id) => `<WeatherCard entityId="${id}" />`,
+    snippet: (id) => `<WeatherCard entityId="${id}" showWind />`,
     Demo: WeatherCard,
   },
   {
@@ -147,7 +147,7 @@ export const DOMAIN_WIDGET_CATALOG: WidgetCatalogEntry[] = [
     category: 'domain',
     domains: ['input_number'],
     inserterDefault: true,
-    snippet: (id) => `<NumberSlider entityId="${id}" />`,
+    snippet: (id) => `<NumberSlider entityId="${id}" min={0} max={100} step={1} />`,
     Demo: NumberSlider,
   },
   {
@@ -236,7 +236,7 @@ export const DOMAIN_WIDGET_CATALOG: WidgetCatalogEntry[] = [
     category: 'domain',
     domains: ['camera'],
     inserterDefault: true,
-    snippet: (id) => `<CameraTile entityId="${id}" />`,
+    snippet: (id) => `<CameraTile entityId="${id}" refreshSec={10} fit="cover" />`,
     Demo: CameraDemo,
   },
   {
