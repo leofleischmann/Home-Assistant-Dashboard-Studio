@@ -1,0 +1,32 @@
+name: Release
+
+# Verifies the panel bundle builds correctly when a release is published.
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build
+
+      - name: Verify panel bundle
+        shell: bash
+        run: |
+          test -f custom_components/homeassistant_dashboard_studio/dashboard.js
+          if grep -q 'from "./' custom_components/homeassistant_dashboard_studio/dashboard.js; then
+            echo "dashboard.js must not import other chunks."
+            exit 1
+          fi

@@ -1,0 +1,73 @@
+name: Auto Release
+
+# When the integration version (custom_components/.../manifest.json) changes on
+# main and no matching GitHub release exists yet, build-verify the bundle and
+# publish a release `v<version>`. HACS then offers it to users as an update.
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: auto-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - id: version
+        shell: bash
+        run: |
+          v=$(jq -r .version custom_components/homeassistant_dashboard_studio/manifest.json)
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+          echo "tag=v$v" >> "$GITHUB_OUTPUT"
+
+      - id: check
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "${{ steps.version.outputs.tag }}" >/dev/null 2>&1; then
+            echo "Release ${{ steps.version.outputs.tag }} already exists — nothing to do."
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No release for ${{ steps.version.outputs.tag }} yet — will publish."
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-node@v4
+        if: steps.check.outputs.exists == 'false'
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Build-verify before releasing
+        if: steps.check.outputs.exists == 'false'
+        shell: bash
+        run: |
+          npm ci
+          npm run check:default
+          npm run build
+          test -f custom_components/homeassistant_dashboard_studio/dashboard.js
+          if ! git diff --quiet -- custom_components/homeassistant_dashboard_studio/dashboard.js; then
+            echo "::error::dashboard.js on main does not match a fresh build — refusing to release."
+            exit 1
+          fi
+
+      - name: Publish release
+        if: steps.check.outputs.exists == 'false'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ steps.version.outputs.tag }}" \
+            --target "${{ github.sha }}" \
+            --title "${{ steps.version.outputs.tag }}" \
+            --generate-notes
