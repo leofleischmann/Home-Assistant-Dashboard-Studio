@@ -825,3 +825,217 @@
 .rd-binary.is-on .rd-binary__state {
   color: var(--rd-ok);
 }
+
+/* ── Media player card ───────────────────────────────────── */
+.rd-media {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.rd-media__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.rd-media__name {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rd-media__play {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--rd-border);
+  background: var(--rd-card-bg);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.rd-media__play.is-playing {
+  background: var(--rd-accent);
+  border-color: var(--rd-accent);
+  color: #fff;
+}
+.rd-media__play:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.rd-media__track {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.rd-media__title {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rd-media__artist {
+  font-size: 0.82rem;
+  color: var(--rd-text-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rd-media__vol {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.rd-media__vol-label {
+  font-size: 0.78rem;
+  color: var(--rd-text-2);
+}
+
+/* ── Cover card ──────────────────────────────────────────── */
+.rd-cover {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.rd-cover__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.rd-cover__name {
+  font-weight: 600;
+}
+.rd-cover__state {
+  font-size: 0.78rem;
+  text-transform: capitalize;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--rd-border);
+  color: var(--rd-text-2);
+}
+.rd-cover__state.is-open {
+  color: var(--rd-accent);
+  border-color: color-mix(in srgb, var(--rd-accent) 35%, transparent);
+}
+.rd-cover__actions {
+  display: flex;
+  gap: 6px;
+}
+.rd-cover__btn {
+  flex: 1;
+  font: inherit;
+  font-size: 0.78rem;
+  padding: 8px 6px;
+  border-radius: 10px;
+  border: 1px solid var(--rd-border);
+  background: transparent;
+  cursor: pointer;
+}
+.rd-cover__btn:hover:not(:disabled) {
+  border-color: var(--rd-accent);
+  color: var(--rd-accent);
+}
+.rd-cover__btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ── Weather card ────────────────────────────────────────── */
+.rd-weather-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.rd-weather-card__name {
+  font-size: 0.82rem;
+  color: var(--rd-text-2);
+}
+.rd-weather-card__main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.rd-weather-card__icon {
+  font-size: 2.2rem;
+  line-height: 1;
+}
+.rd-weather-card__temp {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+}
+.rd-weather-card__temp small {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--rd-text-2);
+}
+.rd-weather-card__meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: var(--rd-text-2);
+  text-transform: capitalize;
+}
+
+/* ── Person chip ─────────────────────────────────────────── */
+.rd-person-chip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+}
+.rd-person-chip__avatar {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+.rd-person-chip__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.rd-person-chip__name {
+  font-weight: 600;
+}
+.rd-person-chip__state {
+  font-size: 0.82rem;
+  color: var(--rd-text-2);
+}
+.rd-person-chip.is-home .rd-person-chip__state {
+  color: var(--rd-ok);
+}
+
+/* ── Number / brightness slider ──────────────────────────── */
+.rd-slider {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.rd-slider__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+.rd-slider__name {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rd-slider__value {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.rd-slider__input {
+  width: 100%;
+  accent-color: var(--rd-accent);
+  cursor: pointer;
+}
+.rd-slider__input:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

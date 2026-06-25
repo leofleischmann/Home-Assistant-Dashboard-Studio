@@ -10,6 +10,7 @@ import {
   isAvailable,
   num,
   stateNumber,
+  weatherIcon,
 } from '../lib/format';
 
 /** Generic card container — the basic building block. */
@@ -415,6 +416,245 @@ export function BinaryBadge({
         <span className="rd-binary__name">{name}</span>
         <span className="rd-binary__state">{on ? onLabel : offLabel}</span>
       </div>
+    </div>
+  );
+}
+
+/** Media player — title, play/pause, volume. */
+export function MediaPlayerCard({
+  entityId,
+  label,
+}: {
+  entityId: string;
+  label?: string;
+}) {
+  const player = useEntity(entityId);
+  const name = label ?? player?.attributes.friendly_name ?? entityId;
+  const title = (player?.attributes.media_title as string | undefined) ?? '–';
+  const artist = player?.attributes.media_artist as string | undefined;
+  const playing = player?.state === 'playing';
+  const volRaw = player?.attributes.volume_level;
+  const volume =
+    typeof volRaw === 'number' ? Math.round(volRaw * 100) : undefined;
+  const usable = isAvailable(player);
+
+  return (
+    <div className="rd-card rd-media">
+      <div className="rd-media__head">
+        <span className="rd-media__name">{name}</span>
+        <button
+          className={`rd-media__play ${playing ? 'is-playing' : ''}`}
+          disabled={!usable}
+          aria-label={playing ? 'Pause' : 'Abspielen'}
+          onClick={() =>
+            callService('media_player', 'media_play_pause', { entity_id: entityId })
+          }
+        >
+          {playing ? '⏸' : '▶'}
+        </button>
+      </div>
+      <div className="rd-media__track">
+        <span className="rd-media__title">{title}</span>
+        {artist && <span className="rd-media__artist">{artist}</span>}
+      </div>
+      {volume !== undefined && (
+        <div className="rd-media__vol">
+          <span className="rd-media__vol-label">🔊 {volume} %</span>
+          <input
+            type="range"
+            className="rd-slider__input"
+            min={0}
+            max={100}
+            step={1}
+            value={volume}
+            disabled={!usable}
+            onChange={(e) =>
+              callService('media_player', 'volume_set', {
+                entity_id: entityId,
+                volume_level: Number(e.target.value) / 100,
+              })
+            }
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Cover / Rollladen — open, close, stop. */
+export function CoverCard({
+  entityId,
+  label,
+}: {
+  entityId: string;
+  label?: string;
+}) {
+  const cover = useEntity(entityId);
+  const name = label ?? cover?.attributes.friendly_name ?? entityId;
+  const state = cover?.state ?? '–';
+  const open = state === 'open';
+  const usable = isAvailable(cover);
+
+  return (
+    <div className="rd-card rd-cover">
+      <div className="rd-cover__head">
+        <span className="rd-cover__name">{name}</span>
+        <span className={`rd-cover__state ${open ? 'is-open' : ''}`}>{state}</span>
+      </div>
+      <div className="rd-cover__actions">
+        <button
+          className="rd-cover__btn"
+          disabled={!usable}
+          onClick={() => callService('cover', 'open_cover', { entity_id: entityId })}
+        >
+          ↑ Offen
+        </button>
+        <button
+          className="rd-cover__btn"
+          disabled={!usable}
+          onClick={() => callService('cover', 'stop_cover', { entity_id: entityId })}
+        >
+          ■ Stop
+        </button>
+        <button
+          className="rd-cover__btn"
+          disabled={!usable}
+          onClick={() => callService('cover', 'close_cover', { entity_id: entityId })}
+        >
+          ↓ Zu
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/** Weather entity — icon, temperature, condition. */
+export function WeatherCard({
+  entityId,
+  label,
+}: {
+  entityId: string;
+  label?: string;
+}) {
+  const weather = useEntity(entityId);
+  const name = label ?? weather?.attributes.friendly_name ?? entityId;
+  const temp = weather?.attributes.temperature;
+  const condition = weather?.attributes.condition as string | undefined;
+  const humidity = weather?.attributes.humidity;
+
+  return (
+    <div className="rd-card rd-weather-card">
+      <span className="rd-weather-card__name">{name}</span>
+      <div className="rd-weather-card__main">
+        <span className="rd-weather-card__icon">{weatherIcon(condition)}</span>
+        <span className="rd-weather-card__temp">
+          {num(temp !== undefined ? String(temp) : undefined)}
+          <small> °C</small>
+        </span>
+      </div>
+      <div className="rd-weather-card__meta">
+        <span>{condition ?? weather?.state ?? '–'}</span>
+        {humidity !== undefined && <span>💧 {num(String(humidity), 0)} %</span>}
+      </div>
+    </div>
+  );
+}
+
+/** Person or device_tracker — home / away chip. */
+export function PersonChip({
+  entityId,
+  label,
+}: {
+  entityId: string;
+  label?: string;
+}) {
+  const entity = useEntity(entityId);
+  const name = label ?? entity?.attributes.friendly_name ?? entityId;
+  const home = entity?.state === 'home' || entity?.state === 'on';
+
+  return (
+    <div className={`rd-card rd-person-chip ${home ? 'is-home' : ''}`}>
+      <span className="rd-person-chip__avatar">{home ? '🏠' : '🚶'}</span>
+      <div className="rd-person-chip__text">
+        <span className="rd-person-chip__name">{name}</span>
+        <span className="rd-person-chip__state">{home ? 'Zuhause' : 'Abwesend'}</span>
+      </div>
+    </div>
+  );
+}
+
+/** Slider for `input_number` or light brightness (`brightness_pct`). */
+export function NumberSlider({
+  entityId,
+  label,
+  min,
+  max,
+  step,
+}: {
+  entityId: string;
+  label?: string;
+  min?: number;
+  max?: number;
+  step?: number;
+}) {
+  const entity = useEntity(entityId);
+  const domain = entityDomain(entityId);
+  const name = label ?? entity?.attributes.friendly_name ?? entityId;
+  const usable = isAvailable(entity);
+
+  const minVal =
+    min ??
+    (domain === 'light' ? 0 : (entity?.attributes.min as number | undefined) ?? 0);
+  const maxVal =
+    max ??
+    (domain === 'light' ? 100 : (entity?.attributes.max as number | undefined) ?? 100);
+  const stepVal =
+    step ?? (entity?.attributes.step as number | undefined) ?? (domain === 'light' ? 1 : 1);
+
+  let value = minVal;
+  if (domain === 'light') {
+    const b = entity?.attributes.brightness;
+    value =
+      entity?.state === 'on' && typeof b === 'number'
+        ? Math.round((b / 255) * 100)
+        : 0;
+  } else {
+    value = stateNumber(entity) ?? minVal;
+  }
+
+  const setValue = (next: number) => {
+    if (domain === 'light') {
+      void callService('light', 'turn_on', {
+        entity_id: entityId,
+        brightness_pct: next,
+      });
+    } else {
+      void callService('input_number', 'set_value', {
+        entity_id: entityId,
+        value: next,
+      });
+    }
+  };
+
+  return (
+    <div className="rd-card rd-slider">
+      <div className="rd-slider__head">
+        <span className="rd-slider__name">{name}</span>
+        <span className="rd-slider__value">
+          {value}
+          {domain === 'light' ? ' %' : ''}
+        </span>
+      </div>
+      <input
+        type="range"
+        className="rd-slider__input"
+        min={minVal}
+        max={maxVal}
+        step={stepVal}
+        value={value}
+        disabled={!usable}
+        onChange={(e) => setValue(Number(e.target.value))}
+      />
     </div>
   );
 }

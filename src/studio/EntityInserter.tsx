@@ -8,9 +8,10 @@ import {
   entityIdSnippet,
   entityValueSnippet,
 } from '../lib/entityActions';
+import { entityWidgetSnippet, widgetForDomain } from '../lib/entityWidgets';
 import type { HassEntity } from '../hass/types';
 
-type Mode = 'value' | 'action' | 'id';
+type Mode = 'value' | 'action' | 'id' | 'widget';
 
 const LIST_LIMIT = 300;
 const ROW_HEIGHT = 52;
@@ -28,9 +29,13 @@ const DOMAIN_FILTERS = [
   ['script', 'Script'],
   ['scene', 'Szene'],
   ['button', 'Button'],
+  ['weather', 'Wetter'],
+  ['person', 'Person'],
+  ['input_number', 'Zahl'],
 ] as const;
 
 function snippetFor(mode: Mode, id: string): string {
+  if (mode === 'widget') return entityWidgetSnippet(id);
   if (mode === 'id') return entityIdSnippet(id);
   if (mode === 'value') return entityValueSnippet(id);
   return entityActionSnippet(id);
@@ -89,6 +94,9 @@ function EntityRow({
         {mode === 'action' && (
           <small className="rd-inserter__svc"> · {entityDomain(entity.entity_id)}</small>
         )}
+        {mode === 'widget' && (
+          <small className="rd-inserter__svc"> · {widgetForDomain(entityDomain(entity.entity_id))}</small>
+        )}
       </span>
     </div>
   );
@@ -113,9 +121,13 @@ export function EntityInserter({
       ? 'light.wohnzimmer'
       : domain === 'sensor'
         ? 'sensor.temperatur'
-        : domain
-          ? `${domain}.beispiel`
-          : 'sensor.beispiel';
+        : domain === 'weather'
+          ? 'weather.home'
+          : domain === 'media_player'
+            ? 'media_player.wohnzimmer'
+            : domain
+              ? `${domain}.beispiel`
+              : 'sensor.beispiel';
 
   const virtualizer = useVirtualizer({
     count: matches.length,
@@ -150,6 +162,7 @@ export function EntityInserter({
             ['value', 'Wert'],
             ['action', 'Aktion'],
             ['id', 'nur ID'],
+            ['widget', 'Widget'],
           ] as [Mode, string][]
         ).map(([m, label]) => (
           <button
@@ -184,7 +197,14 @@ export function EntityInserter({
         </div>
       </div>
 
-      {!hasQuery && !domain && (
+      {mode === 'widget' && (
+        <p className="rd-inserter__hint">
+          Fügt JSX ein — ggf.{' '}
+          <code>{`import { … } from '@ha/ui'`}</code> ergänzen.
+        </p>
+      )}
+
+      {!hasQuery && !domain && mode !== 'widget' && (
         <p className="rd-inserter__hint">
           Suchbegriff oder Domain wählen — es werden die ersten {EMPTY_QUERY_LIMIT}{' '}
           Entities angezeigt.
