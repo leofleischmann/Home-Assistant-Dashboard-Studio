@@ -16,11 +16,23 @@
 .rd-sunarc__celestial {
   transition: transform 1.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
+.rd-sunarc__track-done {
+  stroke: var(--rd-accent);
+  stroke-width: 3;
+  opacity: 0.9;
+  filter: drop-shadow(0 0 3px color-mix(in srgb, var(--rd-accent) 60%, transparent));
+}
+.rd-sunarc--night .rd-sunarc__track-done {
+  opacity: 0.6;
+}
 @media (prefers-reduced-motion: reduce) {
   .rd-sunarc__celestial { transition: none; }
   .rd-sunarc__star,
   .rd-sunarc__rays { animation: none; }
 }
+.rd-sunarc--static .rd-sunarc__celestial { transition: none; }
+.rd-sunarc--static .rd-sunarc__star,
+.rd-sunarc--static .rd-sunarc__rays { animation: none; }
 .rd-sunarc__body { filter: drop-shadow(0 0 6px currentColor); }
 .rd-sunarc__body.is-day { fill: #ffcf5c; color: #ffcf5c; }
 .rd-sunarc__star {
