@@ -1,4 +1,4 @@
-import { useId, useMemo } from 'react';
+import { useId, useMemo, type CSSProperties } from 'react';
 import { useSun, useTime } from '../../hass/hooks';
 import { num } from '../../format';
 import './SunArc.css';
@@ -26,6 +26,14 @@ export type SunArcProps = {
   showRemaining?: boolean;
   /** `compact` scales down the arc for tight layouts. */
   size?: 'compact' | 'default';
+  /** Highlight the portion of the arc already travelled (default true). */
+  showProgress?: boolean;
+  /** Show the central elevation read-out (default true). */
+  showElevation?: boolean;
+  /** Master switch for subtle motion — twinkle, ray spin, glides (default true). */
+  animated?: boolean;
+  /** Override the accent colour used for the arc/progress (any CSS colour). */
+  accentColor?: string;
 };
 
 function moonPhase(date: Date): number {
@@ -193,6 +201,10 @@ export function SunArc({
   labels,
   showRemaining = true,
   size = 'default',
+  showProgress = true,
+  showElevation = true,
+  animated = true,
+  accentColor,
 }: SunArcProps) {
   const sun = useSun(entityId);
   const now = useTime(60_000);
@@ -204,11 +216,14 @@ export function SunArc({
   const elevNightLabel = labels?.elevationNight ?? 'unter Horizont';
 
   const W = 280;
-  const H = 148;
+  const H = 150;
   const pad = 22;
+  // Headroom at the peak so the celestial body + its glow never clip at the top.
+  const peakPad = 26;
   const cx = W / 2;
   const cy = H - 28;
-  const r = (W - pad * 2) / 2;
+  const rx = (W - pad * 2) / 2;
+  const ry = cy - peakPad;
 
   const isDay = sun.isDay ?? true;
   const elevation = sun.elevation ?? 0;
@@ -220,17 +235,17 @@ export function SunArc({
   );
 
   const arcSign = hemisphere === 'south' ? -1 : 1;
-  const sx = cx - r * Math.cos(Math.PI * t);
-  const sy = cy - arcSign * r * Math.sin(Math.PI * t);
+  const arcSweep = hemisphere === 'south' ? 0 : 1;
+  const sx = cx - rx * Math.cos(Math.PI * t);
+  const sy = cy - arcSign * ry * Math.sin(Math.PI * t);
 
   const tone = skyTone(elevation, isDay);
   const golden = isGoldenHour(elevation, isDay);
   const phase = moonPhase(now);
+  const moonIllum = (1 - Math.cos(2 * Math.PI * phase)) / 2;
 
-  const arc =
-    hemisphere === 'south'
-      ? `M ${cx - r} ${cy} A ${r} ${r} 0 0 0 ${cx + r} ${cy}`
-      : `M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`;
+  const arc = `M ${cx - rx} ${cy} A ${rx} ${ry} 0 0 ${arcSweep} ${cx + rx} ${cy}`;
+  const arcDone = `M ${cx - rx} ${cy} A ${rx} ${ry} 0 0 ${arcSweep} ${sx} ${sy}`;
 
   const daylightLeft = useMemo(() => {
     if (!isDay || !sun.setting) return null;
@@ -249,10 +264,22 @@ export function SunArc({
 
   const footer = daylightLeft ?? nightUntilRise;
 
+  const rootClass = [
+    'rd-sunarc',
+    `rd-sunarc--${tone}`,
+    golden && 'rd-sunarc--golden',
+    size === 'compact' && 'rd-sunarc--compact',
+    !animated && 'rd-sunarc--static',
+  ]
+    .filter(Boolean)
+    .join(' ');
+
+  const rootStyle = accentColor
+    ? ({ ['--rd-accent' as string]: accentColor } as CSSProperties)
+    : undefined;
+
   return (
-    <div
-      className={`rd-sunarc rd-sunarc--${tone}${golden ? ' rd-sunarc--golden' : ''}${size === 'compact' ? ' rd-sunarc--compact' : ''}`}
-    >
+    <div className={rootClass} style={rootStyle}>
       <svg viewBox={`0 0 ${W} ${H}`} className="rd-sunarc__svg" aria-hidden>
         <defs>
           <linearGradient id={`${uid}-sky`} x1="0" y1="0" x2="0" y2="1">
@@ -312,8 +339,8 @@ export function SunArc({
             <ellipse
               cx={cx}
               cy={cy}
-              rx={r * 1.05}
-              ry={r * 0.35}
+              rx={rx * 1.05}
+              ry={ry * 0.45}
               className="rd-sunarc__glow-haze"
             />
           )}
@@ -327,9 +354,21 @@ export function SunArc({
             strokeDasharray="2 6"
             strokeLinecap="round"
           />
+          {showProgress && (
+            <path
+              d={arcDone}
+              fill="none"
+              className="rd-sunarc__track-done"
+              strokeLinecap="round"
+            />
+          )}
 
           <g className="rd-sunarc__celestial" transform={`translate(${sx} ${sy})`}>
-            <circle r="22" fill={`url(#${uid}-glow)`} />
+            <circle
+              r="22"
+              fill={`url(#${uid}-glow)`}
+              opacity={isDay ? 1 : 0.3 + 0.7 * moonIllum}
+            />
             {isDay ? (
               <>
                 <circle r="8" className="rd-sunarc__body is-day" />
@@ -364,12 +403,14 @@ export function SunArc({
           <strong>{formatSunEvent(sun.rising, now, locale)}</strong>
           <small>{riseLabel}</small>
         </div>
-        <div className="rd-sunarc__elev">
-          <strong>{num(sun.elevation)}°</strong>
-          <small title={`Azimut ${num(sun.azimuth)}°`}>
-            {isDay ? elevDayLabel : elevNightLabel}
-          </small>
-        </div>
+        {showElevation && (
+          <div className="rd-sunarc__elev">
+            <strong>{num(sun.elevation)}°</strong>
+            <small title={`Azimut ${num(sun.azimuth)}°`}>
+              {isDay ? elevDayLabel : elevNightLabel}
+            </small>
+          </div>
+        )}
         <div>
           <span className="rd-sunarc__ico">↓</span>
           <strong>{formatSunEvent(sun.setting, now, locale)}</strong>
