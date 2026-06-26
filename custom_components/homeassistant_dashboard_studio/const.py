@@ -18,3 +18,4 @@ WS_TYPE_SUBSCRIBE_WORKSPACE = f"{DOMAIN}/subscribe_workspace"
 SIGNAL_WORKSPACE_UPDATED = f"{DOMAIN}_workspace_updated"
 
 CONF_CONFIRM_RESET = "confirm_reset"
+CONF_RESET_COUNT = "reset_count"

@@ -10,8 +10,8 @@ from homeassistant import data_entry_flow  # pyright: ignore[reportMissingImport
 from homeassistant.config_entries import OptionsFlow  # pyright: ignore[reportMissingImports]
 from homeassistant.helpers import config_validation as cv  # pyright: ignore[reportMissingImports]
 
-from .const import CONF_CONFIRM_RESET
-from .reset import async_reset_dashboard_workspace
+from .const import CONF_CONFIRM_RESET, CONF_RESET_COUNT
+from .reset import async_reset_dashboard_workspace, factory_reset_count
 
 
 class ReactDashboardStudioOptionsFlowHandler(OptionsFlow):
@@ -30,7 +30,11 @@ class ReactDashboardStudioOptionsFlowHandler(OptionsFlow):
                 )
 
             await async_reset_dashboard_workspace(self.hass)
-            return self.async_create_entry(title="", data={"reset": True})
+            prev = factory_reset_count(self.hass)
+            return self.async_create_entry(
+                title="",
+                data={CONF_RESET_COUNT: prev + 1},
+            )
 
         return self.async_show_form(step_id="init", data_schema=self._schema())
 

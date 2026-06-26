@@ -1,6 +1,9 @@
 type Listener = () => void;
 
-const STORAGE_PREFIX = 'homeassistant_dashboard_studio:state:';
+/** Prefix for usePersistentState keys in the browser (cleared on integration factory reset). */
+export const DASHBOARD_STATE_STORAGE_PREFIX = 'homeassistant_dashboard_studio:state:';
+
+const STORAGE_PREFIX = DASHBOARD_STATE_STORAGE_PREFIX;
 
 function storageKey(scope: string, key: string): string {
   return `${STORAGE_PREFIX}${scope}:${key}`;
@@ -136,6 +139,46 @@ class DashboardStore {
     if (persistent) removeStorage(this.scope, key);
     this.notify(key);
   }
+
+  /** Drop in-memory dashboard state (localStorage cleared separately). */
+  resetAll(): void {
+    this.memory.clear();
+    this.persistentLoaded.clear();
+    this.scope = 'default';
+    this.notifyAll();
+    this.notify('__scope__');
+  }
 }
 
 export const dashboardStore = new DashboardStore();
+
+/** Remove all browser-persisted dashboard state for this integration. */
+export function clearAllClientIntegrationData(): void {
+  if (typeof localStorage !== 'undefined') {
+    const remove: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key?.startsWith(DASHBOARD_STATE_STORAGE_PREFIX)) remove.push(key);
+    }
+    for (const key of remove) localStorage.removeItem(key);
+  }
+  dashboardStore.resetAll();
+  console.log('[Debug dashboard_store]: cleared all client integration data');
+}
+
+const RESET_COUNT_SESSION_KEY = 'homeassistant_dashboard_studio:last_reset_count';
+
+/**
+ * When the integration was factory-reset (counter in config entry options),
+ * wipe browser state even if this tab missed the live WebSocket event.
+ */
+export function applyFactoryResetCount(resetCount: number): boolean {
+  if (!Number.isFinite(resetCount) || resetCount <= 0) return false;
+  if (typeof sessionStorage === 'undefined') return false;
+  const prev = Number(sessionStorage.getItem(RESET_COUNT_SESSION_KEY) ?? '0');
+  if (resetCount <= prev) return false;
+  clearAllClientIntegrationData();
+  sessionStorage.setItem(RESET_COUNT_SESSION_KEY, String(resetCount));
+  console.log('[Debug dashboard_store]: applied factory reset count', resetCount);
+  return true;
+}
