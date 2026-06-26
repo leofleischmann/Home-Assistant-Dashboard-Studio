@@ -14,10 +14,10 @@
   "options": {
     "step": {
       "init": {
-        "title": "Restore default dashboard",
-        "description": "Deletes the **globally stored** workspace (all dashboards, visible to everyone in your household). The sidebar keeps one default dashboard with the bundled example.\n\n**Note:** Unsaved editor changes are lost. Reload the page after resetting (F5).",
+        "title": "Reset integration (factory defaults)",
+        "description": "Resets **everything** as if the integration were freshly installed:\n\n- All saved dashboards and code (global, all users)\n- Extra sidebar entries\n- Browser data for this integration (e.g. `usePersistentState`)\n\nYou keep **one** default dashboard with the bundled example. The integration itself stays configured.\n\n**Note:** Unsaved editor changes are lost. Open dashboard tabs reload automatically afterwards.",
         "data": {
-          "confirm_reset": "Yes, delete saved dashboards and restore default"
+          "confirm_reset": "Yes, delete everything and restore factory defaults"
         }
       }
     },

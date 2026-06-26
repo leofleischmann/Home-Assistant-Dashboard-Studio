@@ -5,4 +5,9 @@ export {
   clearPersistentState,
   useDashboardScope,
 } from './hooks';
-export { dashboardStore } from './store';
+export {
+  dashboardStore,
+  applyFactoryResetCount,
+  clearAllClientIntegrationData,
+  DASHBOARD_STATE_STORAGE_PREFIX,
+} from './store';

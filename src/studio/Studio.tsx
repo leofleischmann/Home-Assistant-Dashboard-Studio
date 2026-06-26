@@ -8,6 +8,7 @@ import {
   type ComponentType,
   type KeyboardEvent as ReactKeyboardEvent,
 } from 'react';
+import { clearAllClientIntegrationData } from '../sdk/dashboard/store';
 import { useHassReady, useIsMobile } from '../sdk/hass/hooks';
 import { projectUsesDefaultDashboardStyles } from '../lib/projectUsesDefaultStyles';
 import { syncDefaultDashboardStyles } from '../mount';
@@ -25,6 +26,7 @@ import { DEFAULT_PROJECT, type Project } from './project';
 import {
   createWorkspaceProject,
   deleteWorkspaceProject,
+  panelUrlPath,
   renameWorkspaceProject,
   withActiveProject,
   type Workspace,
@@ -124,23 +126,15 @@ export default function Studio() {
   useEffect(() => {
     if (!ready || !loaded || localMode) return;
     return subscribeWorkspaceReset(() => {
-      const fallback: Workspace = {
-        version: 2,
-        activeId: 'default',
-        projects: {
-          default: { name: 'Dashboard', ...DEFAULT_PROJECT },
-        },
-      };
-      fullRebuildRef.current = true;
+      console.log('[Debug Studio]: integration factory reset — reloading default dashboard');
+      clearAllClientIntegrationData();
       clearCompileCache();
-      setWorkspace(fallback);
-      setSavedWorkspace(fallback);
-      setBoundProjectId('default');
-      setProject(DEFAULT_PROJECT);
-      setSavedProject(DEFAULT_PROJECT);
-      setActivePath(DEFAULT_PROJECT.entry);
-      setMode('view');
-      hasCompiledRef.current = false;
+      const defaultPath = `/${panelUrlPath('default')}`;
+      if (window.location.pathname !== defaultPath) {
+        window.location.assign(defaultPath);
+      } else {
+        window.location.reload();
+      }
     });
   }, [ready, loaded, localMode]);
 

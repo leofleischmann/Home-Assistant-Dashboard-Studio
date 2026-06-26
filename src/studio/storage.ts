@@ -1,4 +1,5 @@
 import { hassStore } from '../sdk/hass/store';
+import { applyFactoryResetCount } from '../sdk/dashboard/store';
 import { DEFAULT_PROJECT, blankProject, type Project } from './project';
 import { normalizeWorkspace, withActiveProject, type Workspace } from './workspace';
 
@@ -36,9 +37,13 @@ export async function loadWorkspace(): Promise<Workspace | null> {
   const connection = hassStore.getHass()?.connection;
   if (!connection) return null;
   try {
-    const res = await connection.sendMessagePromise<{ workspace: unknown }>({
+    const res = await connection.sendMessagePromise<{
+      workspace: unknown;
+      reset_count?: number;
+    }>({
       type: WS_GET,
     });
+    applyFactoryResetCount(res?.reset_count ?? 0);
     const workspace = normalizeWorkspace(res?.workspace);
     return workspace;
   } catch (err) {
@@ -89,8 +94,9 @@ export function subscribeWorkspaceReset(onReset: () => void): () => void {
   let unsub: (() => void) | undefined;
   let skipInitial = true;
   void connection
-    .subscribeMessage<{ workspace: unknown }>(
+    .subscribeMessage<{ workspace: unknown; reset_count?: number }>(
       (msg) => {
+        applyFactoryResetCount(msg?.reset_count ?? 0);
         if (skipInitial) {
           skipInitial = false;
           return;

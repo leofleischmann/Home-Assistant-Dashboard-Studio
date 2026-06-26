@@ -15,6 +15,7 @@ from .const import (
     WS_TYPE_SAVE_WORKSPACE,
     WS_TYPE_SUBSCRIBE_WORKSPACE,
 )
+from .reset import workspace_message
 from .panels import async_sync_sidebar_panels
 
 
@@ -31,7 +32,7 @@ async def ws_get_workspace(hass: HomeAssistant, connection, msg: dict) -> None:
     """Return the global dashboard workspace (all HA users)."""
     store = hass.data[DOMAIN]["store"]
     workspace = await store.async_get_workspace()
-    connection.send_result(msg["id"], {"workspace": workspace})
+    connection.send_result(msg["id"], workspace_message(hass, workspace))
 
 
 @websocket_api.websocket_command(
@@ -63,7 +64,7 @@ async def ws_subscribe_workspace(hass: HomeAssistant, connection, msg: dict) -> 
     @callback
     def forward(workspace: dict | None) -> None:
         connection.send_message(
-            websocket_api.event_message(msg["id"], {"workspace": workspace})
+            websocket_api.event_message(msg["id"], workspace_message(hass, workspace))
         )
 
     unsub = async_dispatcher_connect(hass, SIGNAL_WORKSPACE_UPDATED, forward)
@@ -72,5 +73,5 @@ async def ws_subscribe_workspace(hass: HomeAssistant, connection, msg: dict) -> 
     store = hass.data[DOMAIN]["store"]
     workspace = await store.async_get_workspace()
     connection.send_message(
-        websocket_api.event_message(msg["id"], {"workspace": workspace})
+        websocket_api.event_message(msg["id"], workspace_message(hass, workspace))
     )
