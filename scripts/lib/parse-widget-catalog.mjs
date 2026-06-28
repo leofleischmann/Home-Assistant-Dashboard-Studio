@@ -101,13 +101,15 @@ function parseCatalogFile(filePath) {
  */
 export function parseWidgetCatalog(catalogRoot) {
   const entries = [];
-  const domainDir = join(catalogRoot, 'domain');
 
+  // Domain widget descriptors live next to their components as `<x>.widget.ts`.
+  const domainDir = join(catalogRoot, '..', 'cards', 'domain');
   for (const file of readdirSync(domainDir)) {
-    if (!file.endsWith('.ts')) continue;
+    if (!file.endsWith('.widget.ts')) continue;
     entries.push(...parseCatalogFile(join(domainDir, file)));
   }
 
+  // Featured/composite stay as consolidated catalog files.
   for (const file of ['featured.ts', 'composite.tsx']) {
     entries.push(...parseCatalogFile(join(catalogRoot, file)));
   }

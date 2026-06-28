@@ -1,8 +1,8 @@
-import { LightTile } from '../../cards/domain';
-import type { WidgetCatalogEntry } from '../types';
+import { LightTile } from './index';
+import { defineWidget, type WidgetCatalogEntry } from '../../catalog/types';
 
 export const LIGHT_DOMAIN_CATALOG: WidgetCatalogEntry[] = [
-  {
+  defineWidget({
     name: 'LightTile',
     label: 'Licht',
     category: 'domain',
@@ -10,5 +10,5 @@ export const LIGHT_DOMAIN_CATALOG: WidgetCatalogEntry[] = [
     inserterDefault: true,
     snippet: (id) => `<LightTile entityId="${id}" showBrightness />`,
     Demo: LightTile,
-  },
+  }),
 ];

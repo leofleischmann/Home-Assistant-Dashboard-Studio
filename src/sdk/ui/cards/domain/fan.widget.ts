@@ -1,8 +1,8 @@
-import { FanCard } from '../../cards/domain';
-import type { WidgetCatalogEntry } from '../types';
+import { FanCard } from './index';
+import { defineWidget, type WidgetCatalogEntry } from '../../catalog/types';
 
 export const FAN_DOMAIN_CATALOG: WidgetCatalogEntry[] = [
-  {
+  defineWidget({
     name: 'FanCard',
     label: 'Ventilator',
     category: 'domain',
@@ -10,5 +10,5 @@ export const FAN_DOMAIN_CATALOG: WidgetCatalogEntry[] = [
     inserterDefault: true,
     snippet: (id) => `<FanCard entityId="${id}" />`,
     Demo: FanCard,
-  },
+  }),
 ];

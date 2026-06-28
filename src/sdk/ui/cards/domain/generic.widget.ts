@@ -1,14 +1,15 @@
+import { ActionButton, BinaryBadge, EntityRow, Gauge } from './index';
+import { defineWidget, type WidgetCatalogEntry } from '../../catalog/types';
 import {
-  ActionButton,
-  BinaryBadge,
-  EntityRow,
-  Gauge,
-} from '../../cards/domain';
-import type { WidgetCatalogEntry } from '../types';
-import { pickNumericSensorEntity, SparkDemo, StatDemo, CircularProgressDemo, pickBatteryEntity } from '../demos';
+  pickNumericSensorEntity,
+  SparkDemo,
+  StatDemo,
+  CircularProgressDemo,
+  pickBatteryEntity,
+} from '../../catalog/demos';
 
 export const GENERIC_DOMAIN_CATALOG: WidgetCatalogEntry[] = [
-  {
+  defineWidget({
     name: 'Stat',
     label: 'Stat',
     category: 'domain',
@@ -16,8 +17,8 @@ export const GENERIC_DOMAIN_CATALOG: WidgetCatalogEntry[] = [
     snippet: (id) =>
       `<Stat label="${id.split('.')[1] ?? 'Sensor'}" value={num(useEntity('${id}')?.state)} color="var(--rd-accent)" />`,
     Demo: StatDemo,
-  },
-  {
+  }),
+  defineWidget({
     name: 'Gauge',
     label: 'Gauge',
     category: 'domain',
@@ -25,8 +26,8 @@ export const GENERIC_DOMAIN_CATALOG: WidgetCatalogEntry[] = [
     inserterDefault: true,
     snippet: (id) => `<Gauge entityId="${id}" min={0} max={100} color="var(--rd-accent)" />`,
     Demo: Gauge,
-  },
-  {
+  }),
+  defineWidget({
     name: 'SparkChart',
     label: 'SparkChart',
     category: 'domain',
@@ -35,8 +36,8 @@ export const GENERIC_DOMAIN_CATALOG: WidgetCatalogEntry[] = [
     snippet:
       '<SparkChart series={[…]} height={80} axes={{ xLabel: "Zeit", yLabel: "Wert" }} showLegend />',
     Demo: SparkDemo,
-  },
-  {
+  }),
+  defineWidget({
     name: 'CircularProgress',
     label: 'Fortschritts-Ring',
     category: 'domain',
@@ -45,8 +46,8 @@ export const GENERIC_DOMAIN_CATALOG: WidgetCatalogEntry[] = [
     snippet: (id) =>
       `<CircularProgress value={Number(useEntity('${id}', { fallback: '0' }).state) || 0} max={100} warningBelow={30} criticalBelow={15} label="…" />`,
     Demo: CircularProgressDemo,
-  },
-  {
+  }),
+  defineWidget({
     name: 'EntityRow',
     label: 'Entity-Zeile',
     category: 'domain',
@@ -54,8 +55,8 @@ export const GENERIC_DOMAIN_CATALOG: WidgetCatalogEntry[] = [
     inserterDefault: true,
     snippet: (id) => `<EntityRow entityId="${id}" />`,
     Demo: EntityRow,
-  },
-  {
+  }),
+  defineWidget({
     name: 'BinaryBadge',
     label: 'Binary',
     category: 'domain',
@@ -63,13 +64,13 @@ export const GENERIC_DOMAIN_CATALOG: WidgetCatalogEntry[] = [
     inserterDefault: true,
     snippet: (id) => `<BinaryBadge entityId="${id}" />`,
     Demo: BinaryBadge,
-  },
-  {
+  }),
+  defineWidget({
     name: 'ActionButton',
     label: 'Aktion',
     category: 'domain',
     domains: ['button', 'automation'],
     snippet: (id) => `<ActionButton entityId="${id}" />`,
     Demo: ActionButton,
-  },
+  }),
 ];

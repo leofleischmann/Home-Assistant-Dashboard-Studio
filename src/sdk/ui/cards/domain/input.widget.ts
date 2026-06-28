@@ -1,8 +1,8 @@
-import { InputBooleanTile, NumberSlider, SelectCard } from '../../cards/domain';
-import type { WidgetCatalogEntry } from '../types';
+import { InputBooleanTile, NumberSlider, SelectCard } from './index';
+import { defineWidget, type WidgetCatalogEntry } from '../../catalog/types';
 
 export const INPUT_DOMAIN_CATALOG: WidgetCatalogEntry[] = [
-  {
+  defineWidget({
     name: 'NumberSlider',
     label: 'Zahl',
     category: 'domain',
@@ -10,8 +10,8 @@ export const INPUT_DOMAIN_CATALOG: WidgetCatalogEntry[] = [
     inserterDefault: true,
     snippet: (id) => `<NumberSlider entityId="${id}" min={0} max={100} step={1} />`,
     Demo: NumberSlider,
-  },
-  {
+  }),
+  defineWidget({
     name: 'InputBooleanTile',
     label: 'Schalter',
     category: 'domain',
@@ -19,8 +19,8 @@ export const INPUT_DOMAIN_CATALOG: WidgetCatalogEntry[] = [
     inserterDefault: true,
     snippet: (id) => `<InputBooleanTile entityId="${id}" />`,
     Demo: InputBooleanTile,
-  },
-  {
+  }),
+  defineWidget({
     name: 'SelectCard',
     label: 'Auswahl',
     category: 'domain',
@@ -28,5 +28,5 @@ export const INPUT_DOMAIN_CATALOG: WidgetCatalogEntry[] = [
     inserterDefault: true,
     snippet: (id) => `<SelectCard entityId="${id}" />`,
     Demo: SelectCard,
-  },
+  }),
 ];

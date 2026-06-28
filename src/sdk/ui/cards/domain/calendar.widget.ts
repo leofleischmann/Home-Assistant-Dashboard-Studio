@@ -1,8 +1,8 @@
-import { CalendarCard } from '../../cards/domain';
-import type { WidgetCatalogEntry } from '../types';
+import { CalendarCard } from './index';
+import { defineWidget, type WidgetCatalogEntry } from '../../catalog/types';
 
 export const CALENDAR_DOMAIN_CATALOG: WidgetCatalogEntry[] = [
-  {
+  defineWidget({
     name: 'CalendarCard',
     label: 'Kalender',
     category: 'domain',
@@ -10,5 +10,5 @@ export const CALENDAR_DOMAIN_CATALOG: WidgetCatalogEntry[] = [
     inserterDefault: true,
     snippet: (id) => `<CalendarCard entityId="${id}" />`,
     Demo: CalendarCard,
-  },
+  }),
 ];

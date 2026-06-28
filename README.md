@@ -109,8 +109,11 @@ npm test        # Vitest — eject generator, freeze logic, CLI⇄studio consist
 
 Add a new importable module (`@ha/…`) in [`src/sdk/modules.ts`](src/sdk/modules.ts) — the
 single manifest that the runtime registry, `tsconfig` paths, the compile-check and the SDK
-reference all derive from (a test fails if they drift). New widgets get an eject source
-automatically via `npm run gen:eject-sources` (run by `build`) — no per-widget maintenance.
+reference all derive from (a test fails if they drift). New domain widgets ship their catalog
+metadata in a `defineWidget()` descriptor right next to the component
+(`cards/domain/<x>.widget.ts`), assembled in [`catalog/domain.ts`](src/sdk/ui/catalog/domain.ts) —
+no separate metadata tree. Eject sources are generated automatically via
+`npm run gen:eject-sources` (run by `build`) — no per-widget maintenance.
 Starter dashboard: [`default-dashboard/`](default-dashboard/).
 
 CI ([`.github/workflows/validate.yml`](.github/workflows/validate.yml)) mirrors these: build,
