@@ -1,7 +1,7 @@
 import { type ComponentType } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import Studio from './studio/Studio';
-import { RenderRootContext } from './sdk/renderRoot';
+import { RenderRootContext, OVERLAY_ROOT_ID, PANEL_ROOT_ID } from './sdk/renderRoot';
 import { defaultDashboardCss, sdkPanelCss } from './panel-styles';
 import studioCss from './studio/studio.css?inline';
 
@@ -37,7 +37,11 @@ export function mountStudio(host: HTMLElement, App: ComponentType = Studio): Roo
   const style = document.createElement('style');
   style.textContent = basePanelCss();
   const container = document.createElement('div');
-  shadow.replaceChildren(style, container);
+  container.id = PANEL_ROOT_ID;
+  const overlays = document.createElement('div');
+  overlays.id = OVERLAY_ROOT_ID;
+  overlays.setAttribute('aria-hidden', 'true');
+  shadow.replaceChildren(style, container, overlays);
 
   const root = createRoot(container);
   root.render(

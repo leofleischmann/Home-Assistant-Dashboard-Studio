@@ -1972,10 +1972,20 @@ function useRenderRoot(): ShadowRoot | Document {
   return useContext(RenderRootContext);
 }
 
+/** Stable ids for shadow-root mount targets (see mount.tsx). */
+const PANEL_ROOT_ID = 'rd-panel-root';
+
+const OVERLAY_ROOT_ID = 'rd-overlay-root';
+
 /** Mount container inside the panel shadow root — safe portal target for overlays. */
 function chartTooltipPortalTarget(root: ShadowRoot | Document): Element | null {
   if (root instanceof ShadowRoot) {
-    return root.firstElementChild;
+    const overlay = root.getElementById(OVERLAY_ROOT_ID);
+    if (overlay) return overlay;
+    const panel = root.getElementById(PANEL_ROOT_ID);
+    if (panel) return panel;
+    // Legacy: style is first child, React mounts in the next element.
+    return root.lastElementChild;
   }
   return document.body;
 }

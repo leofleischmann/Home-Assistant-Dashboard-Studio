@@ -205,6 +205,15 @@
   pointer-events: none;
 }
 
+/* Shadow-root overlay layer for portaled chart tooltips (mount.tsx). */
+#rd-overlay-root {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  pointer-events: none;
+  overflow: visible;
+}
+
 .rd-chart__tooltip--align-center {
   transform: translate(-50%, calc(-100% - 12px));
 }
