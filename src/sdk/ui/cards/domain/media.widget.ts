@@ -1,8 +1,8 @@
-import { MediaPlayerCard } from '../../cards/domain';
-import type { WidgetCatalogEntry } from '../types';
+import { MediaPlayerCard } from './index';
+import { defineWidget, type WidgetCatalogEntry } from '../../catalog/types';
 
 export const MEDIA_DOMAIN_CATALOG: WidgetCatalogEntry[] = [
-  {
+  defineWidget({
     name: 'MediaPlayerCard',
     label: 'Media',
     category: 'domain',
@@ -10,5 +10,5 @@ export const MEDIA_DOMAIN_CATALOG: WidgetCatalogEntry[] = [
     inserterDefault: true,
     snippet: (id) => `<MediaPlayerCard entityId="${id}" />`,
     Demo: MediaPlayerCard,
-  },
+  }),
 ];

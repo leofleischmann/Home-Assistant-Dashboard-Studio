@@ -1,8 +1,8 @@
-import { ValveCard } from '../../cards/domain';
-import type { WidgetCatalogEntry } from '../types';
+import { ValveCard } from './index';
+import { defineWidget, type WidgetCatalogEntry } from '../../catalog/types';
 
 export const VALVE_DOMAIN_CATALOG: WidgetCatalogEntry[] = [
-  {
+  defineWidget({
     name: 'ValveCard',
     label: 'Ventil',
     category: 'domain',
@@ -10,5 +10,5 @@ export const VALVE_DOMAIN_CATALOG: WidgetCatalogEntry[] = [
     inserterDefault: true,
     snippet: (id) => `<ValveCard entityId="${id}" />`,
     Demo: ValveCard,
-  },
+  }),
 ];

@@ -1,8 +1,8 @@
-import { ClimateCard, HumidifierCard, WaterHeaterCard } from '../../cards/domain';
-import type { WidgetCatalogEntry } from '../types';
+import { ClimateCard, HumidifierCard, WaterHeaterCard } from './index';
+import { defineWidget, type WidgetCatalogEntry } from '../../catalog/types';
 
 export const CLIMATE_DOMAIN_CATALOG: WidgetCatalogEntry[] = [
-  {
+  defineWidget({
     name: 'ClimateCard',
     label: 'Klima',
     category: 'domain',
@@ -11,8 +11,8 @@ export const CLIMATE_DOMAIN_CATALOG: WidgetCatalogEntry[] = [
     snippet: (id) =>
       `<ClimateCard entityId="${id}" showTarget showMode showToggle />`,
     Demo: ClimateCard,
-  },
-  {
+  }),
+  defineWidget({
     name: 'HumidifierCard',
     label: 'Luftbefeuchter',
     category: 'domain',
@@ -20,8 +20,8 @@ export const CLIMATE_DOMAIN_CATALOG: WidgetCatalogEntry[] = [
     inserterDefault: true,
     snippet: (id) => `<HumidifierCard entityId="${id}" />`,
     Demo: HumidifierCard,
-  },
-  {
+  }),
+  defineWidget({
     name: 'WaterHeaterCard',
     label: 'Warmwasser',
     category: 'domain',
@@ -29,5 +29,5 @@ export const CLIMATE_DOMAIN_CATALOG: WidgetCatalogEntry[] = [
     inserterDefault: true,
     snippet: (id) => `<WaterHeaterCard entityId="${id}" />`,
     Demo: WaterHeaterCard,
-  },
+  }),
 ];

@@ -1,8 +1,8 @@
-import type { WidgetCatalogEntry } from '../types';
-import { CameraDemo } from '../demos';
+import { defineWidget, type WidgetCatalogEntry } from '../../catalog/types';
+import { CameraDemo } from '../../catalog/demos';
 
 export const CAMERA_DOMAIN_CATALOG: WidgetCatalogEntry[] = [
-  {
+  defineWidget({
     name: 'CameraTile',
     label: 'Kamera',
     category: 'domain',
@@ -10,5 +10,5 @@ export const CAMERA_DOMAIN_CATALOG: WidgetCatalogEntry[] = [
     inserterDefault: true,
     snippet: (id) => `<CameraTile entityId="${id}" refreshSec={10} fit="cover" />`,
     Demo: CameraDemo,
-  },
+  }),
 ];
