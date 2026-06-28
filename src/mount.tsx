@@ -1,7 +1,7 @@
 import { type ComponentType } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import Studio from './studio/Studio';
-import { RenderRootContext } from './studio/shadowRoot';
+import { RenderRootContext } from './sdk/renderRoot';
 import { defaultDashboardCss, sdkPanelCss } from './panel-styles';
 import studioCss from './studio/studio.css?inline';
 

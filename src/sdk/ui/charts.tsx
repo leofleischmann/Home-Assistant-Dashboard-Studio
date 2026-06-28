@@ -8,6 +8,8 @@ import {
   type ReactNode,
   type RefObject,
 } from 'react';
+import { createPortal } from 'react-dom';
+import { chartTooltipPortalTarget, useRenderRoot } from '../renderRoot';
 import type { HistoryPoint } from '../hass/sources/history';
 import {
   combinedTimeRange,
@@ -203,9 +205,11 @@ function ChartTooltip({
   locale: string;
   formatY: (v: number) => string;
 }) {
+  const renderRoot = useRenderRoot();
   const align = tooltipAlign(hover.xPct);
+  const portalTarget = chartTooltipPortalTarget(renderRoot);
 
-  return (
+  const tooltip = (
     <div
       className={`rd-chart__tooltip rd-chart__tooltip--fixed rd-chart__tooltip--align-${align}`}
       style={{ left: hover.clientX, top: hover.clientY }}
@@ -228,6 +232,12 @@ function ChartTooltip({
       </ul>
     </div>
   );
+
+  // Portaled so parent backdrop-filter / overflow (e.g. glass cards) cannot offset or clip fixed tooltips.
+  if (portalTarget) {
+    return createPortal(tooltip, portalTarget);
+  }
+  return tooltip;
 }
 
 function ChartPlotArea({

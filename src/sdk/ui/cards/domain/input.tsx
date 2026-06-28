@@ -97,9 +97,13 @@ export function NumberSlider({
   const entityValue = useMemo(() => {
     if (domain === 'light') {
       const b = entity?.attributes.brightness;
-      return entity?.state === 'on' && typeof b === 'number'
-        ? Math.round((b / 255) * 100)
-        : 0;
+      if (entity?.state === 'on') {
+        if (typeof b === 'number') {
+          return Math.max(1, Math.round((b / 255) * 100));
+        }
+        return 100;
+      }
+      return 0;
     }
     return stateNumber(entity) ?? minVal;
   }, [domain, entity, minVal]);

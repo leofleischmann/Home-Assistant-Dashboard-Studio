@@ -198,9 +198,11 @@
   pointer-events: none;
 }
 
+/* Viewport coords; rendered via portal outside backdrop-filter ancestors (see charts.tsx). */
 .rd-chart__tooltip--fixed {
   position: fixed;
   z-index: 10000;
+  pointer-events: none;
 }
 
 .rd-chart__tooltip--align-center {
