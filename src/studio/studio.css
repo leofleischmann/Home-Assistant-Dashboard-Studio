@@ -154,9 +154,13 @@
 .rd-files {
   position: relative;
   flex: 0 0 184px;
+  width: 184px;
+  min-width: 184px;
+  max-width: 184px;
   display: flex;
   flex-direction: column;
   min-height: 0;
+  overflow: hidden;
   background: #181818;
   border-right: 1px solid #2a2a2a;
   color: #d6d8e0;
@@ -201,6 +205,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
+  min-width: 0;
   padding: 5px 6px;
   border-radius: 6px;
   cursor: pointer;
@@ -219,15 +224,18 @@
 }
 .rd-files__dirname {
   flex: 1;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.rd-files__dir .rd-files__actions {
-  display: none;
+.rd-files__dir .rd-files__actions .rd-files__icon {
+  visibility: hidden;
+  pointer-events: none;
 }
-.rd-files__dir:hover .rd-files__actions {
-  display: flex;
+.rd-files__dir:hover .rd-files__actions .rd-files__icon {
+  visibility: visible;
+  pointer-events: auto;
 }
 
 /* Bulk actions */
@@ -279,13 +287,17 @@
   list-style: none;
   margin: 0;
   padding: 4px;
+  overflow-x: hidden;
   overflow-y: auto;
+  scrollbar-gutter: stable;
   flex: 1;
+  min-height: 0;
 }
 .rd-files__item {
   display: flex;
   align-items: center;
   gap: 4px;
+  min-width: 0;
   padding: 5px 6px;
   border-radius: 6px;
   cursor: pointer;
@@ -300,16 +312,26 @@
 }
 .rd-files__name {
   flex: 1;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .rd-files__actions {
-  display: none;
+  display: flex;
+  flex: 0 0 auto;
   gap: 2px;
 }
-.rd-files__item:hover .rd-files__actions {
-  display: flex;
+.rd-files__item .rd-files__icon,
+.rd-files__item .rd-files__entry:not(.is-entry) {
+  visibility: hidden;
+  pointer-events: none;
+}
+.rd-files__item:hover .rd-files__icon,
+.rd-files__item:hover .rd-files__entry:not(.is-entry),
+.rd-files__item .rd-files__entry.is-entry {
+  visibility: visible;
+  pointer-events: auto;
 }
 .rd-files__icon,
 .rd-files__entry {
@@ -327,11 +349,7 @@
   background: #3a3a3a;
 }
 .rd-files__entry.is-entry {
-  display: inline;
   color: #ffcf5c;
-}
-.rd-files__item:not(:hover) .rd-files__entry.is-entry {
-  display: inline;
 }
 
 /* Entity / action inserter */
